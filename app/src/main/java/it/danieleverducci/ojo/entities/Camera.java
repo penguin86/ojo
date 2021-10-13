@@ -1,0 +1,21 @@
+package it.danieleverducci.ojo.entities;
+
+import java.io.Serializable;
+
+public class Camera implements Serializable {
+    private String name;
+    private String rtspUrl;
+
+    public Camera(String name, String rtspUrl) {
+        this.name = name;
+        this.rtspUrl = rtspUrl;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getRtspUrl() {
+        return rtspUrl;
+    }
+}
