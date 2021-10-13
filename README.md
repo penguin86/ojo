@@ -1,4 +1,4 @@
-![Ojo Logo](/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png)
+![Ojo Logo](/media/icon.png)
 
 # Ojo: the FLOSS RTSP Surveillance camera viewer for Android
 
@@ -15,5 +15,5 @@ The maximum number of cameras is determined by the device's capabilities.
 The stream decoding and rendering is demanded to [VLC's library](https://code.videolan.org/videolan/vlc-android): without their effort this app wouldn't be possible.
 This app was specifically developed for F-Droid, as I couldn't find any open source RTSP vievers in the main repository.
 
-![Screenshot 1](screenshots/1.png)      ![Screenshot 2](screenshots/2.png)      ![Screenshot 3](screenshots/3.png)
+![Screenshot 1](media/screenshots/1.png)      ![Screenshot 2](media/screenshots/2.png)      ![Screenshot 3](media/screenshots/3.png)
 
