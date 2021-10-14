@@ -52,14 +52,31 @@ public class SurveillanceFragment extends Fragment {
 
     private FragmentSurveillanceBinding binding;
     private List<CameraView> cameraViews = new ArrayList<>();
-    int viewMargin;
+    private boolean fullscreenCameraView = false;
+    private LinearLayout.LayoutParams cameraViewLayoutParams;
+    private LinearLayout.LayoutParams rowLayoutParams;
+    private LinearLayout.LayoutParams hiddenLayoutParams;
 
     @Override
     public View onCreateView(
             LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState
     ) {
-        viewMargin = DpiUtils.DpToPixels(container.getContext(), 2);
+        int viewMargin = DpiUtils.DpToPixels(container.getContext(), 2);
+        cameraViewLayoutParams = new LinearLayout.LayoutParams(
+                0,
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                1.0f
+        );
+        cameraViewLayoutParams.setMargins(viewMargin,viewMargin,viewMargin,viewMargin);
+
+        rowLayoutParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                1.0f
+        );
+
+        hiddenLayoutParams = new LinearLayout.LayoutParams(0, 0);
 
         binding = FragmentSurveillanceBinding.inflate(inflater, container, false);
         return binding.getRoot();
@@ -114,29 +131,30 @@ public class SurveillanceFragment extends Fragment {
         for (int r = 0; r < elemsPerSide; r++) {
             // Create row and add to row container
             LinearLayout row = new LinearLayout(getContext());
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    0,
-                    1.0f
-            );
-            binding.gridRowContainer.addView(row, params);
+            binding.gridRowContainer.addView(row, rowLayoutParams);
             // Add camera viewers to the row
             for (int c = 0; c < elemsPerSide; c++) {
                 if ( camIdx < cc.size() ) {
                     Camera cam = cc.get(camIdx);
                     CameraView cv = addCameraView(cam, row);
                     cv.startPlayback();
+                    cv.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            // Toggle single/multi camera views
+                            fullscreenCameraView = !fullscreenCameraView;
+                            if (fullscreenCameraView) {
+                                hideAllCameraViewsButNot(v);
+                            } else {
+                                showAllCameras();
+                            }
+                        }
+                    });
                 } else {
                     // Cameras are less than the maximum number of cells in grid: fill remaining cells with empty views
                     View ev = new View(getContext());
                     ev.setBackgroundColor(getResources().getColor(R.color.purple_700));
-                    LinearLayout.LayoutParams evParams = new LinearLayout.LayoutParams(
-                            0,
-                            LinearLayout.LayoutParams.MATCH_PARENT,
-                            1.0f
-                    );
-                    evParams.setMargins(viewMargin,viewMargin,viewMargin,viewMargin);
-                    row.addView(ev, evParams);
+                    row.addView(ev, cameraViewLayoutParams);
                 }
                 camIdx++;
             }
@@ -156,22 +174,26 @@ public class SurveillanceFragment extends Fragment {
     protected void hideAllCameraViewsButNot(View cameraView) {
         for (int i = 0; i < binding.gridRowContainer.getChildCount(); i++) {
             LinearLayout row = (LinearLayout) binding.gridRowContainer.getChildAt(i);
+            boolean emptyRow = true;
             for (int j = 0; j < row.getChildCount(); j++) {
                 View cam = row.getChildAt(j);
-                if (cameraView.getId() == cam.getId())
-                    cam.setVisibility(View.VISIBLE);
+                if (cameraView == cam)
+                    emptyRow = false;
                 else
-                    cam.setVisibility(View.GONE);
+                    cam.setLayoutParams(hiddenLayoutParams);
             }
+            if (emptyRow)
+                row.setLayoutParams(hiddenLayoutParams);
         }
     }
 
     protected void showAllCameras() {
         for (int i = 0; i < binding.gridRowContainer.getChildCount(); i++) {
             LinearLayout row = (LinearLayout) binding.gridRowContainer.getChildAt(i);
+            row.setLayoutParams(rowLayoutParams);
             for (int j = 0; j < row.getChildCount(); j++) {
                 View cam = row.getChildAt(j);
-                cam.setVisibility(View.VISIBLE);
+                cam.setLayoutParams(cameraViewLayoutParams);
             }
         }
     }
@@ -183,13 +205,7 @@ public class SurveillanceFragment extends Fragment {
         );
 
         // Add to layout
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                1.0f
-        );
-        params.setMargins(viewMargin,viewMargin,viewMargin,viewMargin);
-        rowContainer.addView(cv.surfaceView, params);
+        rowContainer.addView(cv.surfaceView, cameraViewLayoutParams);
 
         cameraViews.add(cv);
         return cv;
@@ -223,7 +239,7 @@ public class SurveillanceFragment extends Fragment {
             surfaceView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    SurveillanceFragment.this.hideAllCameraViewsButNot(v);
+
                 }
             });
             SurfaceHolder holder = surfaceView.getHolder();
@@ -248,6 +264,10 @@ public class SurveillanceFragment extends Fragment {
                 // Set rendering size
                 ivlcVout.setWindowSize(surfaceView.getWidth(), surfaceView.getHeight());
             });
+        }
+
+        public void setOnClickListener(View.OnClickListener listener) {
+            surfaceView.setOnClickListener(listener);
         }
 
         /**
