@@ -57,7 +57,7 @@ public class AddStreamFragment extends Fragment {
 
                 // Back to first fragment
                 NavHostFragment.findNavController(AddStreamFragment.this)
-                        .navigate(R.id.action_SecondFragment_to_FirstFragment);
+                        .popBackStack();
             }
         });
     }
