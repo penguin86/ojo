@@ -2,9 +2,8 @@
 
 # Ojo: the FLOSS RTSP Surveillance camera viewer for Android
 
-[<img src="https://raw.githubusercontent.com/andOTP/andOTP/master/assets/badges/get-it-on-github.png" height="80">](https://github.com/penguin86/ojo/releases/latest)
-
-F-droid build **coming soon!**
+[<img src="https://raw.githubusercontent.com/andOTP/andOTP/master/assets/badges/get-it-on-github.png" height="80">](https://github.com/penguin86/ojo/releases/latest) 
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="80">](https://f-droid.org/it/packages/it.danieleverducci.ojo)
 
 (Always prefer [F-Droid](https://f-droid.org) build, when possible).
 
