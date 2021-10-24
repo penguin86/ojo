@@ -1,0 +1,1 @@
+Downgraded LibVLC library to fix black screen bug on certain devices

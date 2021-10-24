@@ -18,7 +18,7 @@ import android.widget.LinearLayout;
 
 import androidx.fragment.app.Fragment;
 
-import org.videolan.libvlc.interfaces.IVLCVout;
+import org.videolan.libvlc.IVLCVout;
 import org.videolan.libvlc.LibVLC;
 import org.videolan.libvlc.Media;
 import org.videolan.libvlc.MediaPlayer;
