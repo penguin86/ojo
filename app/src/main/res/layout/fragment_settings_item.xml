@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="@dimen/text_margin"
+    android:paddingBottom="@dimen/text_margin"
+    android:orientation="horizontal">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:padding="10dp"
+        android:layout_weight="0"
+        app:srcCompat="@drawable/ic_network_camera"
+        app:tint="@color/design_default_color_primary"/>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/camera_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5sp"
+            android:textAppearance="?attr/textAppearanceListItem"
+            android:textColor="@color/design_default_color_primary"
+            android:lines="1"
+            android:text="@tools:sample/lorem/random"/>
+
+        <TextView
+            android:id="@+id/camera_url"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceListItemSecondary"
+            android:lines="1"
+            android:text="@tools:sample/lorem/random" />
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/camera_drag_handle"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:padding="10dp"
+        android:layout_weight="0"
+        app:srcCompat="@drawable/ic_drag_handle"
+        app:tint="@color/purple_200" />
+
+</LinearLayout>

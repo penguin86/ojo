@@ -13,13 +13,19 @@
 
         <action
             android:id="@+id/action_FirstFragment_to_SecondFragment"
-            app:destination="@id/SecondFragment" />
+            app:destination="@id/SettingsFragment" />
     </fragment>
     <fragment
         android:id="@+id/SecondFragment"
         android:name="it.danieleverducci.ojo.ui.AddStreamFragment"
         android:label="@string/second_fragment_label"
         tools:layout="@layout/fragment_add_stream">
+    </fragment>
+    <fragment
+        android:id="@+id/SettingsFragment"
+        android:name="it.danieleverducci.ojo.ui.SettingsFragment"
+        android:label="fragment_settings_item_list"
+        tools:layout="@layout/fragment_settings_item_list" >
 
         <action
             android:id="@+id/action_SecondFragment_to_FirstFragment"

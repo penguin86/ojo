@@ -5,6 +5,8 @@
     <string name="first_fragment_label">First Fragment</string>
     <string name="second_fragment_label">Second Fragment</string>
 
+    <string name="stream_list_default_camera_name">Videocamera n°{camNo}</string>
+
     <string name="add_stream_placeholder_url">rtsp://username:password@192.168.1.123:554</string>
     <string name="add_stream">Inserisci l\'url dello stream RTSP della tua IP Camera. Nota che questo differisce tra un modello e l\'altro. Consulta il pannello di configurazione o il manuale della tua IP Camera.</string>
     <string name="add_stream_save">Salva</string>
@@ -17,4 +19,5 @@
     <string name="app_info_license_desc">Questa app è rilasciata sotto licenza GNU GENERAL PUBLIC LICENSE v3+. Puoi ottenerne una copia qui: https://raw.githubusercontent.com/penguin86/ojo/master/LICENSE</string>
     <string name="app_info_repo_desc">Puoi trovare il codice sorgente al repository: https://github.com/penguin86/ojo</string>
     <string name="app_info_lib_desc">Questa app è resa possibile dal magnifico lavoro dei team vlc and vlc-android! Per saperne di più o ottenere il codice sorgente: https://code.videolan.org/videolan/vlc-android</string>
+
 </resources>
