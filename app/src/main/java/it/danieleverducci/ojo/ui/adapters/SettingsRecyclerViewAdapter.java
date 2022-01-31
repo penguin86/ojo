@@ -24,6 +24,7 @@ public class SettingsRecyclerViewAdapter extends RecyclerView.Adapter<SettingsRe
 
     private final List<Camera> mValues;
     private OnDragListener dragListener;
+    private OnClickListener clickListener;
 
     public SettingsRecyclerViewAdapter(List<Camera> items) {
         mValues = items;
@@ -38,6 +39,12 @@ public class SettingsRecyclerViewAdapter extends RecyclerView.Adapter<SettingsRe
             }
             return false;
         });
+        vh.root.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                clickListener.onItemClick((Camera)view.getTag());
+            }
+        });
         return vh;
     }
 
@@ -48,6 +55,8 @@ public class SettingsRecyclerViewAdapter extends RecyclerView.Adapter<SettingsRe
             cameraName = holder.name.getContext().getString(R.string.stream_list_default_camera_name).replace("{camNo}", (position+1)+"");
         holder.name.setText(cameraName);
         holder.url.setText(mValues.get(position).getRtspUrl());
+        // Save item
+        holder.root.setTag(mValues.get(position));
     }
 
     @Override
@@ -85,8 +94,12 @@ public class SettingsRecyclerViewAdapter extends RecyclerView.Adapter<SettingsRe
     public void setOnDragListener(OnDragListener dragListener) {
         this.dragListener = dragListener;
     }
+    public void setOnClickListener(OnClickListener clickListener) {
+        this.clickListener = clickListener;
+    }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
+        public View root;
         public TextView name;
         public TextView url;
         public View dragHandle;
@@ -94,6 +107,7 @@ public class SettingsRecyclerViewAdapter extends RecyclerView.Adapter<SettingsRe
         public ViewHolder(FragmentSettingsItemBinding binding) {
             super(binding.getRoot());
 
+            this.root = binding.getRoot();
             this.name = binding.cameraName;
             this.url = binding.cameraUrl;
             this.dragHandle = binding.cameraDragHandle;
@@ -102,5 +116,9 @@ public class SettingsRecyclerViewAdapter extends RecyclerView.Adapter<SettingsRe
 
     public interface OnDragListener {
         void onItemDrag(ViewHolder vh);
+    }
+
+    public interface OnClickListener {
+        void onItemClick(Camera c);
     }
 }

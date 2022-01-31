@@ -55,6 +55,13 @@ public class SettingsFragment extends Fragment {
             touchHelper.attachToRecyclerView(recyclerView);
             adapter.setOnDragListener(touchHelper::startDrag);
             recyclerView.setAdapter(adapter);
+            // Onclick listener
+            adapter.setOnClickListener(new SettingsRecyclerViewAdapter.OnClickListener() {
+                @Override
+                public void onItemClick(Camera c) {
+                    ((MainActivity)getActivity()).navigateToFragment(R.id.action_homeToSettings);
+                }
+            });
         }
         return view;
     }
