@@ -97,6 +97,10 @@ public class SettingsRecyclerViewAdapter extends RecyclerView.Adapter<SettingsRe
         this.clickListener = clickListener;
     }
 
+    public List<Camera> getItems() {
+        return mValues;
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder {
         public View root;
         public TextView name;

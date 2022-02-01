@@ -10,7 +10,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/settingsToolbar"
-        app:title="@string/app_name" />
+        app:title="@string/app_name"
+        style="@style/ToolBarStyle"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list"

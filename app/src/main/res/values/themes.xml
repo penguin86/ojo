@@ -14,6 +14,9 @@
         <item name="colorOnSecondary">@color/white</item>
     </style>
 
-
+    <style name="ToolBarStyle" parent="">
+        <item name="android:background">@color/purple_500</item>
+        <item name="titleTextColor">@color/white</item>
+    </style>
 
 </resources>

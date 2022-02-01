@@ -5,6 +5,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -31,14 +32,38 @@ import it.danieleverducci.ojo.utils.ItemMoveCallback;
 public class SettingsFragment extends Fragment {
 
     private FragmentSettingsItemListBinding binding;
+    private Settings settings;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         binding = FragmentSettingsItemListBinding.inflate(inflater, container, false);
 
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        // Setup toolbar and register for item click
+        binding.settingsToolbar.inflateMenu(R.menu.settings_menu);
+        binding.settingsToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                if (item.getItemId() == R.id.menuitem_add_camera) {
+                    ((MainActivity)getActivity()).navigateToFragment(R.id.action_settingsToCameraUrl);
+                    return true;
+                }
+                return false;
+            }
+        });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
         // Load cameras
-        Settings settings = Settings.fromDisk(getContext());
+        settings = Settings.fromDisk(getContext());
         List<Camera> cams = settings.getCameras();
 
         // Set the adapter
@@ -60,21 +85,15 @@ public class SettingsFragment extends Fragment {
                 ((MainActivity)getActivity()).navigateToFragment(R.id.action_settingsToCameraUrl, b);
             }
         });
-
-        return binding.getRoot();
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        binding.settingsToolbar.inflateMenu(R.menu.settings_menu);
-    }
+    public void onPause() {
+        super.onPause();
 
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.menuitem_add_camera) {
-            ((MainActivity)getActivity()).navigateToFragment(R.id.action_settingsToCameraUrl);
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+        // Save cameras
+        List<Camera> cams = ((SettingsRecyclerViewAdapter)binding.list.getAdapter()).getItems();
+        this.settings.setCameras(cams);
+        this.settings.save();
     }
 }
