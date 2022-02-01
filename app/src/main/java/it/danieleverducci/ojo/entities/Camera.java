@@ -11,6 +11,14 @@ public class Camera implements Serializable {
         this.rtspUrl = rtspUrl;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setRtspUrl(String rtspUrl) {
+        this.rtspUrl = rtspUrl;
+    }
+
     public String getName() {
         return name;
     }

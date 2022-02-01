@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
@@ -16,9 +17,20 @@ import it.danieleverducci.ojo.Settings;
 import it.danieleverducci.ojo.databinding.FragmentAddStreamBinding;
 import it.danieleverducci.ojo.entities.Camera;
 
-public class AddStreamFragment extends Fragment {
+public class StreamUrlFragment extends Fragment {
+    public static final String ARG_CAMERA = "arg_camera";
 
     private FragmentAddStreamBinding binding;
+    private Settings settings;
+    private Integer selectedCamera = null;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Load existing settings (if any)
+        settings = Settings.fromDisk(getContext());
+    }
 
     @Override
     public View onCreateView(
@@ -27,6 +39,18 @@ public class AddStreamFragment extends Fragment {
     ) {
 
         binding = FragmentAddStreamBinding.inflate(inflater, container, false);
+
+        // If passed an url, fill the details
+        Bundle args = getArguments();
+        if (args != null && args.containsKey(ARG_CAMERA)) {
+            this.selectedCamera = args.getInt(ARG_CAMERA);
+
+            Camera c = settings.getCameras().get(this.selectedCamera);
+            binding.streamName.setText(c.getName());
+            binding.streamName.setHint(getContext().getString(R.string.stream_list_default_camera_name).replace("{camNo}", (this.selectedCamera+1)+""));
+            binding.streamUrl.setText(c.getRtspUrl());
+        }
+
         return binding.getRoot();
 
     }
@@ -45,10 +69,19 @@ public class AddStreamFragment extends Fragment {
                     return;
                 }
 
-                // Load existing settings (if any)
-                Settings settings = Settings.fromDisk(getContext());
-                // Add stream to list
-                settings.addCamera(new Camera("", url));
+                // Name can be empty
+                String name = binding.streamName.getText().toString();
+
+                if (StreamUrlFragment.this.selectedCamera != null) {
+                    // Update camera
+                    Camera c = settings.getCameras().get(StreamUrlFragment.this.selectedCamera);
+                    c.setName(name);
+                    c.setRtspUrl(url);
+                } else {
+                    // Add stream to list
+                    settings.addCamera(new Camera(name, url));
+                }
+
                 // Save
                 if (!settings.save()) {
                     Snackbar.make(view, R.string.add_stream_error_saving, Snackbar.LENGTH_LONG).show();
@@ -56,7 +89,7 @@ public class AddStreamFragment extends Fragment {
                 }
 
                 // Back to first fragment
-                NavHostFragment.findNavController(AddStreamFragment.this)
+                NavHostFragment.findNavController(StreamUrlFragment.this)
                         .popBackStack();
             }
         });

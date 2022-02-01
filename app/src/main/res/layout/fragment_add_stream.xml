@@ -22,6 +22,22 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:text="@string/add_stream_name"/>
+
+        <EditText
+            android:id="@+id/stream_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:hint="@string/add_stream_placeholder_url"
+            android:lines="1"
+            android:maxLines="1"
+            android:inputType="textUri"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
             android:text="@string/add_stream"/>
 
         <EditText

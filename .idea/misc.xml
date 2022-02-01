@@ -4,10 +4,11 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.45" />
-        <entry key="app/src/main/res/layout/fragment_add_stream.xml" value="0.536" />
+        <entry key="app/src/main/res/layout/fragment_add_stream.xml" value="0.524901185770751" />
         <entry key="app/src/main/res/layout/fragment_settings_item.xml" value="0.536" />
-        <entry key="app/src/main/res/layout/fragment_settings_item_list.xml" value="0.19010416666666666" />
+        <entry key="app/src/main/res/layout/fragment_settings_item_list.xml" value="0.4" />
         <entry key="app/src/main/res/layout/fragment_surveillance.xml" value="0.16354166666666667" />
+        <entry key="app/src/main/res/menu/settings_menu.xml" value="0.3458333333333333" />
       </map>
     </option>
   </component>

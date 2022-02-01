@@ -39,12 +39,6 @@ public class SettingsRecyclerViewAdapter extends RecyclerView.Adapter<SettingsRe
             }
             return false;
         });
-        vh.root.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                clickListener.onItemClick((Camera)view.getTag());
-            }
-        });
         return vh;
     }
 
@@ -55,8 +49,13 @@ public class SettingsRecyclerViewAdapter extends RecyclerView.Adapter<SettingsRe
             cameraName = holder.name.getContext().getString(R.string.stream_list_default_camera_name).replace("{camNo}", (position+1)+"");
         holder.name.setText(cameraName);
         holder.url.setText(mValues.get(position).getRtspUrl());
-        // Save item
-        holder.root.setTag(mValues.get(position));
+
+        holder.root.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                clickListener.onItemClick(position);
+            }
+        });
     }
 
     @Override
@@ -119,6 +118,6 @@ public class SettingsRecyclerViewAdapter extends RecyclerView.Adapter<SettingsRe
     }
 
     public interface OnClickListener {
-        void onItemClick(Camera c);
+        void onItemClick(int pos);
     }
 }

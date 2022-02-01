@@ -5,14 +5,17 @@
     <string name="first_fragment_label">First Fragment</string>
     <string name="second_fragment_label">Second Fragment</string>
 
-    <string name="stream_list_default_camera_name">Videocamera n°{camNo}</string>
+    <string name="stream_list_default_camera_name">Videocamera senza nome n°{camNo}</string>
 
     <string name="add_stream_placeholder_url">rtsp://username:password@192.168.1.123:554</string>
+    <string name="add_stream_name">Nome della IP Camera</string>
     <string name="add_stream">Inserisci l\'url dello stream RTSP della tua IP Camera. Nota che questo differisce tra un modello e l\'altro. Consulta il pannello di configurazione o il manuale della tua IP Camera.</string>
     <string name="add_stream_save">Salva</string>
     <string name="add_stream_invalid_url">L\'URL RTSP non è valido</string>
     <string name="add_stream_invalid_url_dismiss">Chiudi</string>
     <string name="add_stream_error_saving">Si è verificato un errore durante il salvataggio della configurazione.</string>
+
+    <string name="menu_add_camera">Aggiungi</string>
 
     <string name="app_info_title">Informazioni su Ojo</string>
     <string name="app_info_creator_desc">Creato da Daniele Verducci.</string>

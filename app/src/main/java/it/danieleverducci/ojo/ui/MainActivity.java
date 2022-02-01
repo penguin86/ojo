@@ -44,11 +44,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void navigateToFragment(int actionId) {
+        navigateToFragment(actionId, null);
+    }
+
+    public void navigateToFragment(int actionId, Bundle bundle) {
         if (navController == null) {
             Log.e(TAG, "Not initialized");
             return;
         }
 
-        navController.navigate(actionId);
+        if (bundle != null)
+            navController.navigate(actionId, bundle);
+        else
+            navController.navigate(actionId);
     }
 }

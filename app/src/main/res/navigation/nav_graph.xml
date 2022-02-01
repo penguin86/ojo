@@ -17,7 +17,7 @@
     </fragment>
     <fragment
         android:id="@+id/CameraUrlFragment"
-        android:name="it.danieleverducci.ojo.ui.AddStreamFragment"
+        android:name="it.danieleverducci.ojo.ui.StreamUrlFragment"
         android:label="@string/second_fragment_label"
         tools:layout="@layout/fragment_add_stream">
         <action
