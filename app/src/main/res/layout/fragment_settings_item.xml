@@ -42,6 +42,15 @@
     </LinearLayout>
 
     <ImageView
+        android:id="@+id/camera_delete"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:padding="10dp"
+        android:layout_weight="0"
+        app:srcCompat="@drawable/ic_delete"
+        app:tint="@color/purple_200" />
+
+    <ImageView
         android:id="@+id/camera_drag_handle"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"

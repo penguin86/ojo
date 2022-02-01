@@ -53,7 +53,15 @@ public class SettingsRecyclerViewAdapter extends RecyclerView.Adapter<SettingsRe
         holder.root.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                clickListener.onItemClick(position);
+                clickListener.onItemClick(holder.getBindingAdapterPosition());
+            }
+        });
+
+        holder.deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mValues.remove(holder.getBindingAdapterPosition());
+                notifyItemRemoved(holder.getBindingAdapterPosition());
             }
         });
     }
@@ -105,6 +113,7 @@ public class SettingsRecyclerViewAdapter extends RecyclerView.Adapter<SettingsRe
         public View root;
         public TextView name;
         public TextView url;
+        public View deleteButton;
         public View dragHandle;
 
         public ViewHolder(FragmentSettingsItemBinding binding) {
@@ -113,6 +122,7 @@ public class SettingsRecyclerViewAdapter extends RecyclerView.Adapter<SettingsRe
             this.root = binding.getRoot();
             this.name = binding.cameraName;
             this.url = binding.cameraUrl;
+            this.deleteButton = binding.cameraDelete;
             this.dragHandle = binding.cameraDragHandle;
         }
     }
