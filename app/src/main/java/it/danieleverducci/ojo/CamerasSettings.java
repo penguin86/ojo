@@ -13,27 +13,26 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import it.danieleverducci.ojo.entities.Camera;
 
 /**
  * Manages the settings persistence
  */
-public class Settings implements Serializable {
+public class CamerasSettings implements Serializable {
     private static final String FILENAME = "settings.bin";
     private static final String TAG = "Settings";
 
     private volatile String settingsFilePath;
     private List<Camera> cameras = new ArrayList<>();
 
-    public static Settings fromDisk(Context context) {
+    public static CamerasSettings fromDisk(Context context) {
         String filePath = context.getFilesDir() + File.separator + FILENAME;
-        Settings s = new Settings();
+        CamerasSettings s = new CamerasSettings();
         try {
             FileInputStream fin = new FileInputStream(filePath);
             ObjectInputStream ois = new ObjectInputStream(fin);
-            s = (Settings) ois.readObject();
+            s = (CamerasSettings) ois.readObject();
         } catch (FileNotFoundException e) {
             Log.d(TAG, "No saved settings found, will create a new one");
         } catch (IOException e) {

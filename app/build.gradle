@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId "it.danieleverducci.ojo"
-        minSdkVersion 17
+        minSdkVersion 21
         targetSdkVersion 30
         versionCode 3
         versionName "0.0.3"

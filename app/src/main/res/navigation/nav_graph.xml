@@ -36,5 +36,12 @@
         <action
             android:id="@+id/action_settingsToCameraUrl"
             app:destination="@id/CameraUrlFragment" />
+        <action
+            android:id="@+id/action_SettingsToInfoFragment"
+            app:destination="@id/infoFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/infoFragment"
+        android:name="it.danieleverducci.ojo.ui.InfoFragment"
+        android:label="InfoFragment" />
 </navigation>

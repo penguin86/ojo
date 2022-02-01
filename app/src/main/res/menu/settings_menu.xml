@@ -1,8 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
     <item android:id="@+id/menuitem_add_camera"
         android:icon="@drawable/ic_add"
-        android:title="@string/add_stream"
+        android:title="@string/menuitem_add_camera"
         app:showAsAction="always"/>
+
+    <item android:id="@+id/menuitem_allow_rotation"
+        android:title="@string/menuitem_allow_rotation"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/menuitem_info"
+        android:title="@string/menuitem_info"
+        app:showAsAction="never"/>
+
 </menu>

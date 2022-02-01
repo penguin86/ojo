@@ -9,13 +9,15 @@
     <string name="add_stream_placeholder_url">rtsp://username:password@192.168.1.123:554</string>
     <string name="add_stream_placeholder_name">Camera name</string>
     <string name="add_stream_name">Camera name</string>
-    <string name="add_stream">Please insert your camera\'s RTSP stream. Note that the URL differs from camera to camera: you can find the complete URL in your camera\'s settings or user manual.</string>
     <string name="add_stream_save">Save</string>
     <string name="add_stream_invalid_url">Invalid RTSP url</string>
     <string name="add_stream_invalid_url_dismiss">Dismiss</string>
     <string name="add_stream_error_saving">An error has occurred while saving configuration</string>
-
-    <string name="menu_add_camera">Add</string>
+    <string name="add_stream">Please insert your camera\'s RTSP stream. Note that the URL differs from camera to camera: you can find the complete URL in your camera\'s settings or user manual.</string>
+    <string name="menuitem_allow_rotation">Allow screen rotation</string>
+    <string name="menuitem_deny_rotation">Landscape only</string>
+    <string name="menuitem_info">Info</string>
+    <string name="menuitem_add_camera">Add</string>
 
     <string name="app_info_title">About Ojo</string>
     <string name="app_info_creator_desc">Created by Daniele Verducci.</string>

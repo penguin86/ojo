@@ -7,6 +7,7 @@
         <entry key="app/src/main/res/drawable/ic_add.xml" value="0.1565" />
         <entry key="app/src/main/res/drawable/ic_add_camera.xml" value="0.1565" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.45" />
+        <entry key="app/src/main/res/layout/dialog_info.xml" value="0.7119565217391305" />
         <entry key="app/src/main/res/layout/fragment_add_stream.xml" value="0.524901185770751" />
         <entry key="app/src/main/res/layout/fragment_settings_item.xml" value="0.536" />
         <entry key="app/src/main/res/layout/fragment_settings_item_list.xml" value="0.4" />

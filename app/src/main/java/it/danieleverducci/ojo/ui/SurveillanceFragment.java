@@ -28,7 +28,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import it.danieleverducci.ojo.R;
-import it.danieleverducci.ojo.Settings;
+import it.danieleverducci.ojo.CamerasSettings;
 import it.danieleverducci.ojo.databinding.FragmentSurveillanceBinding;
 import it.danieleverducci.ojo.entities.Camera;
 import it.danieleverducci.ojo.utils.DpiUtils;
@@ -123,7 +123,7 @@ public class SurveillanceFragment extends Fragment {
 
 
     private void addAllCameras() {
-        Settings settings = Settings.fromDisk(getContext());
+        CamerasSettings settings = CamerasSettings.fromDisk(getContext());
         List<Camera> cc = settings.getCameras();
 
         int elemsPerSide = calcGridSideElements(cc.size());

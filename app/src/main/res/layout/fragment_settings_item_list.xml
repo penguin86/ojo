@@ -11,13 +11,14 @@
         android:layout_height="wrap_content"
         android:id="@+id/settingsToolbar"
         app:title="@string/app_name"
-        style="@style/ToolBarStyle"/>
+        style="@style/ToolBarStyle" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list"
         android:name="it.danieleverducci.ojo.ui.SettingsFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         app:layoutManager="LinearLayoutManager"

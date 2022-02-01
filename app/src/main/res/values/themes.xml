@@ -12,9 +12,11 @@
         <item name="colorSecondary">@color/purple_500</item>
         <item name="colorSecondaryVariant">@color/purple_700</item>
         <item name="colorOnSecondary">@color/white</item>
+
+        <item name="colorAccent">@color/white</item>
     </style>
 
-    <style name="ToolBarStyle" parent="">
+    <style name="ToolBarStyle" parent="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
         <item name="android:background">@color/purple_500</item>
         <item name="titleTextColor">@color/white</item>
     </style>
