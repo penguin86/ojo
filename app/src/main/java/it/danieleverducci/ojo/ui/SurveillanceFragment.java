@@ -118,6 +118,20 @@ public class SurveillanceFragment extends Fragment {
     public void onPause() {
         super.onPause();
 
+        // Disable Leanback mode (fullscreen)
+        Window window = getActivity().getWindow();
+        if (window != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                final WindowInsetsController controller = window.getInsetsController();
+
+                if (controller != null)
+                    controller.show(WindowInsets.Type.statusBars());
+            } else {
+                window.getDecorView().setSystemUiVisibility(
+                        View.SYSTEM_UI_FLAG_VISIBLE);
+            }
+        }
+
         disposeAllCameras();
     }
 
