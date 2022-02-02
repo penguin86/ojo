@@ -1,0 +1,3 @@
+Possibilità di rimuovere, modificare e riordinare gli stream RTSP.
+Supporto per la rotazione dello schermo (disabilitato di default).
+Migliorato il comportamento quando si preme il bottone Indietro in fullscreen.

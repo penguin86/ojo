@@ -1,0 +1,3 @@
+RTSP Streams can be removed, edited and reordered.
+Now supporting screen rotation (disabled by default).
+Better back button handling in full screen mode.
