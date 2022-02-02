@@ -19,20 +19,21 @@ import it.danieleverducci.ojo.entities.Camera;
 /**
  * Manages the settings persistence
  */
-public class CamerasSettings implements Serializable {
+public class Settings implements Serializable {
+    private static final long serialVersionUID = 1081285022445419696L;
     private static final String FILENAME = "settings.bin";
     private static final String TAG = "Settings";
 
     private volatile String settingsFilePath;
     private List<Camera> cameras = new ArrayList<>();
 
-    public static CamerasSettings fromDisk(Context context) {
+    public static Settings fromDisk(Context context) {
         String filePath = context.getFilesDir() + File.separator + FILENAME;
-        CamerasSettings s = new CamerasSettings();
+        Settings s = new Settings();
         try {
             FileInputStream fin = new FileInputStream(filePath);
             ObjectInputStream ois = new ObjectInputStream(fin);
-            s = (CamerasSettings) ois.readObject();
+            s = (Settings) ois.readObject();
         } catch (FileNotFoundException e) {
             Log.d(TAG, "No saved settings found, will create a new one");
         } catch (IOException e) {

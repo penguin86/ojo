@@ -13,7 +13,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import com.google.android.material.snackbar.Snackbar;
 
 import it.danieleverducci.ojo.R;
-import it.danieleverducci.ojo.CamerasSettings;
+import it.danieleverducci.ojo.Settings;
 import it.danieleverducci.ojo.databinding.FragmentAddStreamBinding;
 import it.danieleverducci.ojo.entities.Camera;
 
@@ -21,7 +21,7 @@ public class StreamUrlFragment extends Fragment {
     public static final String ARG_CAMERA = "arg_camera";
 
     private FragmentAddStreamBinding binding;
-    private CamerasSettings camerasSettings;
+    private Settings settings;
     private Integer selectedCamera = null;
 
     @Override
@@ -29,7 +29,7 @@ public class StreamUrlFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         // Load existing settings (if any)
-        camerasSettings = CamerasSettings.fromDisk(getContext());
+        settings = Settings.fromDisk(getContext());
     }
 
     @Override
@@ -45,7 +45,7 @@ public class StreamUrlFragment extends Fragment {
         if (args != null && args.containsKey(ARG_CAMERA)) {
             this.selectedCamera = args.getInt(ARG_CAMERA);
 
-            Camera c = camerasSettings.getCameras().get(this.selectedCamera);
+            Camera c = settings.getCameras().get(this.selectedCamera);
             binding.streamName.setText(c.getName());
             binding.streamName.setHint(getContext().getString(R.string.stream_list_default_camera_name).replace("{camNo}", (this.selectedCamera+1)+""));
             binding.streamUrl.setText(c.getRtspUrl());
@@ -74,16 +74,16 @@ public class StreamUrlFragment extends Fragment {
 
                 if (StreamUrlFragment.this.selectedCamera != null) {
                     // Update camera
-                    Camera c = camerasSettings.getCameras().get(StreamUrlFragment.this.selectedCamera);
+                    Camera c = settings.getCameras().get(StreamUrlFragment.this.selectedCamera);
                     c.setName(name);
                     c.setRtspUrl(url);
                 } else {
                     // Add stream to list
-                    camerasSettings.addCamera(new Camera(name, url));
+                    settings.addCamera(new Camera(name, url));
                 }
 
                 // Save
-                if (!camerasSettings.save()) {
+                if (!settings.save()) {
                     Snackbar.make(view, R.string.add_stream_error_saving, Snackbar.LENGTH_LONG).show();
                     return;
                 }

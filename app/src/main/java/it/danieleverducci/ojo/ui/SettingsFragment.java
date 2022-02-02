@@ -1,7 +1,5 @@
 package it.danieleverducci.ojo.ui;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.graphics.Color;
 import android.os.Bundle;
 
@@ -21,7 +19,7 @@ import android.view.ViewGroup;
 import java.util.List;
 
 import it.danieleverducci.ojo.R;
-import it.danieleverducci.ojo.CamerasSettings;
+import it.danieleverducci.ojo.Settings;
 import it.danieleverducci.ojo.SharedPreferencesManager;
 import it.danieleverducci.ojo.databinding.FragmentSettingsItemListBinding;
 import it.danieleverducci.ojo.entities.Camera;
@@ -34,7 +32,7 @@ import it.danieleverducci.ojo.utils.ItemMoveCallback;
 public class SettingsFragment extends Fragment {
 
     private FragmentSettingsItemListBinding binding;
-    private CamerasSettings camerasSettings;
+    private Settings settings;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -79,8 +77,8 @@ public class SettingsFragment extends Fragment {
         super.onResume();
 
         // Load cameras
-        camerasSettings = CamerasSettings.fromDisk(getContext());
-        List<Camera> cams = camerasSettings.getCameras();
+        settings = Settings.fromDisk(getContext());
+        List<Camera> cams = settings.getCameras();
 
         // Set the adapter
         RecyclerView recyclerView = binding.list;
@@ -109,7 +107,7 @@ public class SettingsFragment extends Fragment {
 
         // Save cameras
         List<Camera> cams = ((SettingsRecyclerViewAdapter)binding.list.getAdapter()).getItems();
-        this.camerasSettings.setCameras(cams);
-        this.camerasSettings.save();
+        this.settings.setCameras(cams);
+        this.settings.save();
     }
 }

@@ -3,6 +3,7 @@ package it.danieleverducci.ojo.entities;
 import java.io.Serializable;
 
 public class Camera implements Serializable {
+    private static final long serialVersionUID = -3837361587400158910L;
     private String name;
     private String rtspUrl;
 
