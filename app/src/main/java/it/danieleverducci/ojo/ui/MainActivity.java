@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 
+import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
@@ -21,6 +22,7 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private NavController navController;
     private boolean rotationEnabledSetting;
+    private OnBackButtonPressedListener onBackButtonPressedListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +49,17 @@ public class MainActivity extends AppCompatActivity {
                 navigateToFragment(R.id.action_homeToSettings);
             }
         });
+    }
+
+    public void setOnBackButtonPressedListener(OnBackButtonPressedListener onBackButtonPressedListener) {
+        this.onBackButtonPressedListener = onBackButtonPressedListener;
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (this.onBackButtonPressedListener != null && this.onBackButtonPressedListener.onBackPressed())
+            return;
+        super.onBackPressed();
     }
 
     public void navigateToFragment(int actionId) {

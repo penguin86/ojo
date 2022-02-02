@@ -80,7 +80,6 @@ public class SurveillanceFragment extends Fragment {
 
         binding = FragmentSurveillanceBinding.inflate(inflater, container, false);
         return binding.getRoot();
-
     }
 
     @Override
@@ -106,12 +105,26 @@ public class SurveillanceFragment extends Fragment {
             }
         }
 
+        fullscreenCameraView = false;
         addAllCameras();
 
         // Start playback for all streams
         for (CameraView cv : cameraViews) {
             cv.startPlayback();
         }
+
+        // Register for back pressed events
+        ((MainActivity)getActivity()).setOnBackButtonPressedListener(new OnBackButtonPressedListener() {
+            @Override
+            public boolean onBackPressed() {
+                if(fullscreenCameraView && cameraViews.size() > 1) {
+                    fullscreenCameraView = false;
+                    showAllCameras();
+                    return true;
+                }
+                return false;
+            }
+        });
     }
 
     @Override
