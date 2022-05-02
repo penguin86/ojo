@@ -27,8 +27,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javafx.util.Pair;
-
 import it.danieleverducci.ojo.R;
 import it.danieleverducci.ojo.Settings;
 import it.danieleverducci.ojo.databinding.FragmentSurveillanceBinding;
@@ -155,7 +153,7 @@ public class SurveillanceFragment extends Fragment {
         Settings settings = Settings.fromDisk(getContext());
         List<Camera> cc = settings.getCameras();
 
-        Pair<Integer, Integer> gridSize = calcGridDimensionsBasedOnNumberOfElements(cc.size());
+        int[] gridSize = calcGridDimensionsBasedOnNumberOfElements(cc.size());
         int camIdx = 0;
         for (int r = 0; r < gridSize[0]; r++) {
             // Create row and add to row container
@@ -247,15 +245,16 @@ public class SurveillanceFragment extends Fragment {
      * Es: to display 7 elements is needed a 9-element grid, with 3 elements per side (a 3x3 grid)
      * @param elements
      */
-    private Pair<Integer, Integer> calcGridDimensionsBasedOnNumberOfElements(int elements) {
+    private int[] calcGridDimensionsBasedOnNumberOfElements(int elements) {
         int rows = 1;
         int cols = 1;
         while (rows * cols < elements) {
-          cols += 1;
-          if (rows * cols >= elements) break;
-          rows += 1;
+            cols += 1;
+            if (rows * cols >= elements) break;
+            rows += 1;
         }
-        return new Pair<Integer, Integer>(rows, cols);
+        int[] dimensions = {rows, cols};
+        return dimensions;
     }
 
     /**
