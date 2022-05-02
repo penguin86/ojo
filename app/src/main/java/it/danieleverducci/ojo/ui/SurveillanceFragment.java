@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javafx.util.Pair;
+
 import it.danieleverducci.ojo.R;
 import it.danieleverducci.ojo.Settings;
 import it.danieleverducci.ojo.databinding.FragmentSurveillanceBinding;
@@ -153,14 +155,14 @@ public class SurveillanceFragment extends Fragment {
         Settings settings = Settings.fromDisk(getContext());
         List<Camera> cc = settings.getCameras();
 
-        int elemsPerSide = calcGridSideElements(cc.size());
+        Pair<Integer, Integer> gridSize = calcGridDimensionsBasedOnNumberOfElements(cc.size());
         int camIdx = 0;
-        for (int r = 0; r < elemsPerSide; r++) {
+        for (int r = 0; r < gridSize[0]; r++) {
             // Create row and add to row container
             LinearLayout row = new LinearLayout(getContext());
             binding.gridRowContainer.addView(row, rowLayoutParams);
             // Add camera viewers to the row
-            for (int c = 0; c < elemsPerSide; c++) {
+            for (int c = 0; c < gridSize[1]; c++) {
                 if ( camIdx < cc.size() ) {
                     Camera cam = cc.get(camIdx);
                     CameraView cv = addCameraView(cam, row);
@@ -239,13 +241,21 @@ public class SurveillanceFragment extends Fragment {
     }
 
     /**
-     * Returns the number of elements per side needed to create a grid that can contain the provided elements number.
+     * Returns the dimensions of the grid based on the number of elements.
      * Es: to display 3 elements is needed a 4-element grid, with 2 elements per side (a 2x2 grid)
+     * Es: to display 6 elements is needed a 9-element grid, with 3 elements per side (a 2x3 grid)
      * Es: to display 7 elements is needed a 9-element grid, with 3 elements per side (a 3x3 grid)
      * @param elements
      */
-    private int calcGridSideElements(int elements) {
-        return (int)(Math.ceil(Math.sqrt(elements)));
+    private Pair<Integer, Integer> calcGridDimensionsBasedOnNumberOfElements(int elements) {
+        int rows = 1;
+        int cols = 1;
+        while (rows * cols < elements) {
+          cols += 1;
+          if (rows * cols >= elements) break;
+          rows += 1;
+        }
+        return new Pair<Integer, Integer>(rows, cols);
     }
 
     /**
