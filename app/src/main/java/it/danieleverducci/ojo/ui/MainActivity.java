@@ -72,10 +72,14 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        if (bundle != null)
-            navController.navigate(actionId, bundle);
-        else
-            navController.navigate(actionId);
+        try {
+            if (bundle != null)
+                navController.navigate(actionId, bundle);
+            else
+                navController.navigate(actionId);
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Unable to navigate to fragment: " + e.getMessage());
+        }
     }
 
     public boolean getRotationEnabledSetting() {
