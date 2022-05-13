@@ -153,14 +153,14 @@ public class SurveillanceFragment extends Fragment {
         Settings settings = Settings.fromDisk(getContext());
         List<Camera> cc = settings.getCameras();
 
-        int elemsPerSide = calcGridSideElements(cc.size());
+        int[] gridSize = calcGridDimensionsBasedOnNumberOfElements(cc.size());
         int camIdx = 0;
-        for (int r = 0; r < elemsPerSide; r++) {
+        for (int r = 0; r < gridSize[0]; r++) {
             // Create row and add to row container
             LinearLayout row = new LinearLayout(getContext());
             binding.gridRowContainer.addView(row, rowLayoutParams);
             // Add camera viewers to the row
-            for (int c = 0; c < elemsPerSide; c++) {
+            for (int c = 0; c < gridSize[1]; c++) {
                 if ( camIdx < cc.size() ) {
                     Camera cam = cc.get(camIdx);
                     CameraView cv = addCameraView(cam, row);
@@ -239,13 +239,22 @@ public class SurveillanceFragment extends Fragment {
     }
 
     /**
-     * Returns the number of elements per side needed to create a grid that can contain the provided elements number.
+     * Returns the dimensions of the grid based on the number of elements.
      * Es: to display 3 elements is needed a 4-element grid, with 2 elements per side (a 2x2 grid)
+     * Es: to display 6 elements is needed a 9-element grid, with 3 elements per side (a 2x3 grid)
      * Es: to display 7 elements is needed a 9-element grid, with 3 elements per side (a 3x3 grid)
      * @param elements
      */
-    private int calcGridSideElements(int elements) {
-        return (int)(Math.ceil(Math.sqrt(elements)));
+    private int[] calcGridDimensionsBasedOnNumberOfElements(int elements) {
+        int rows = 1;
+        int cols = 1;
+        while (rows * cols < elements) {
+            cols += 1;
+            if (rows * cols >= elements) break;
+            rows += 1;
+        }
+        int[] dimensions = {rows, cols};
+        return dimensions;
     }
 
     /**
