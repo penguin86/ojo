@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">Ojo</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+
+    <string name="stream_list_default_camera_name">未命名相机 {camNo}</string>
+
+    <string name="add_stream_placeholder_url">rtsp://username:password@192.168.1.123:554</string>
+    <string name="add_stream_placeholder_name">相机名称</string>
+    <string name="add_stream_name">名称</string>
+    <string name="add_stream_save">保存</string>
+    <string name="add_stream_invalid_url">无效的 RTSP 地址</string>
+    <string name="add_stream_invalid_url_dismiss">取消</string>
+    <string name="add_stream_error_saving">保存配置时出错</string>
+    <string name="add_stream">请输入您相机的 RTSP 流。请注意，该 URL 因相机而异：您可以在相机的设置或用户手册中找到完整的 URL。</string>
+    <string name="menuitem_allow_rotation">允许屏幕旋转</string>
+    <string name="menuitem_deny_rotation">仅横屏</string>
+    <string name="menuitem_info">信息</string>
+    <string name="menuitem_add_camera">添加</string>
+
+    <string name="app_info_title">关于 Ojo</string>
+    <string name="app_info_creator_desc">Created by Daniele Verducci.</string>
+    <string name="app_info_license_desc">此应用程序在 GNU GENERAL PUBLIC LICENSE v3+ 下获得许可。您可以在此处获取副本：https://raw.githubusercontent.com/penguin86/ojo/master/LICENSE</string>
+    <string name="app_info_repo_desc">源码可以在github仓库获取：https://github.com/penguin86/ojo</string>
+    <string name="app_info_lib_desc">这个应用程序是通过 vlc 和 vlc-android 团队的努力实现的！您可以在 https://code.videolan.org/videolan/vlc-android 了解更多或获取源代码</string>
+    <string name="enable">启用</string>
+    <string name="app_info_lib_gsy">这个应用程序是通过 GSYVideoPlayer 实现的！您可以在 https://github.com/CarGuo/GSYVideoPlayer 了解更多或获取源代码</string>
+</resources>

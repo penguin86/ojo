@@ -56,6 +56,12 @@
             android:layout_marginTop="20dp"
             android:text="@string/app_info_lib_desc"
             android:autoLink="web"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/app_info_lib_gsy"
+            android:autoLink="web"/>
     </LinearLayout>
 
 </ScrollView>

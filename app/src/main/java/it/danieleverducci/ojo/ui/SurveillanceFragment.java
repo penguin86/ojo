@@ -1,37 +1,36 @@
 package it.danieleverducci.ojo.ui;
 
-import android.content.Context;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.widget.LinearLayout;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
-import org.videolan.libvlc.IVLCVout;
-import org.videolan.libvlc.LibVLC;
-import org.videolan.libvlc.Media;
-import org.videolan.libvlc.MediaPlayer;
+import com.shuyu.gsyvideoplayer.player.IjkPlayerManager;
+import com.shuyu.gsyvideoplayer.player.PlayerFactory;
+import com.shuyu.gsyvideoplayer.player.SystemPlayerManager;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import it.danieleverducci.ojo.R;
 import it.danieleverducci.ojo.Settings;
+import it.danieleverducci.ojo.SharedPreferencesManager;
 import it.danieleverducci.ojo.databinding.FragmentSurveillanceBinding;
 import it.danieleverducci.ojo.entities.Camera;
+import it.danieleverducci.ojo.ui.videoplayer.BaseCameraView;
+import it.danieleverducci.ojo.ui.videoplayer.vlc.VlcCameraView;
+import it.danieleverducci.ojo.ui.videoplayer.gsy.GsyCameraView;
+import it.danieleverducci.ojo.ui.videoplayer.VideoLibEnum;
 import it.danieleverducci.ojo.utils.DpiUtils;
+import tv.danmaku.ijk.media.exo2.Exo2PlayerManager;
 
 /**
  * Some streams to test:
@@ -39,19 +38,12 @@ import it.danieleverducci.ojo.utils.DpiUtils;
  * rtsp://demo:demo@ipvmdemo.dyndns.org:5541/onvif-media/media.amp?profile=profile_1_h264&sessiontimeout=60&streamtype=unicast
  */
 public class SurveillanceFragment extends Fragment {
+    public static VideoLibEnum videoLibEnum = VideoLibEnum.EXO;
 
-    final static private String TAG = "SurveillanceFragment";
-    final static private String[] VLC_OPTIONS = new String[]{
-            "--aout=opensles",
-            //"--audio-time-stretch", // time stretching
-            //"-vvv", // verbosity
-            "--avcodec-codec=h264",
-            //"--file-logging",
-            //"--logfile=vlc-log.txt"
-    };
+    public final static String TAG = "SurveillanceFragment";
 
     private FragmentSurveillanceBinding binding;
-    private List<CameraView> cameraViews = new ArrayList<>();
+    private final List<BaseCameraView> cameraViews = new ArrayList<>();
     private boolean fullscreenCameraView = false;
     private LinearLayout.LayoutParams cameraViewLayoutParams;
     private LinearLayout.LayoutParams rowLayoutParams;
@@ -59,16 +51,16 @@ public class SurveillanceFragment extends Fragment {
 
     @Override
     public View onCreateView(
-            LayoutInflater inflater, ViewGroup container,
+            @NonNull LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState
     ) {
-        int viewMargin = DpiUtils.DpToPixels(container.getContext(), 2);
+        int viewMargin = DpiUtils.DpToPixels(requireContext(), 2);
         cameraViewLayoutParams = new LinearLayout.LayoutParams(
                 0,
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 1.0f
         );
-        cameraViewLayoutParams.setMargins(viewMargin,viewMargin,viewMargin,viewMargin);
+        cameraViewLayoutParams.setMargins(viewMargin, viewMargin, viewMargin, viewMargin);
 
         rowLayoutParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -83,11 +75,33 @@ public class SurveillanceFragment extends Fragment {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        setUseWhichVideoPlayer();
+    }
+
+    private void setUseWhichVideoPlayer() {
+        int whichlib = SharedPreferencesManager.useWhichLib(requireContext());
+        if (whichlib == VideoLibEnum.EXO.i) {
+            videoLibEnum = VideoLibEnum.EXO;
+            PlayerFactory.setPlayManager(Exo2PlayerManager.class);
+        } else if (whichlib == VideoLibEnum.VLC.i) {
+            videoLibEnum = VideoLibEnum.VLC;
+        } else if (whichlib == VideoLibEnum.IJK.i) {
+            videoLibEnum = VideoLibEnum.IJK;
+            PlayerFactory.setPlayManager(IjkPlayerManager.class);
+        } else if (whichlib == VideoLibEnum.SYSTEM.i) {
+            videoLibEnum = VideoLibEnum.SYSTEM;
+            PlayerFactory.setPlayManager(SystemPlayerManager.class);
+        }
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
 
         // Leanback mode (fullscreen)
-        Window window = getActivity().getWindow();
+        Window window = requireActivity().getWindow();
         if (window != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 final WindowInsetsController controller = window.getInsetsController();
@@ -109,15 +123,15 @@ public class SurveillanceFragment extends Fragment {
         addAllCameras();
 
         // Start playback for all streams
-        for (CameraView cv : cameraViews) {
+        for (BaseCameraView cv : cameraViews) {
             cv.startPlayback();
         }
 
         // Register for back pressed events
-        ((MainActivity)getActivity()).setOnBackButtonPressedListener(new OnBackButtonPressedListener() {
+        ((MainActivity) requireActivity()).setOnBackButtonPressedListener(new OnBackButtonPressedListener() {
             @Override
             public boolean onBackPressed() {
-                if(fullscreenCameraView && cameraViews.size() > 1) {
+                if (fullscreenCameraView && cameraViews.size() > 1) {
                     fullscreenCameraView = false;
                     showAllCameras();
                     return true;
@@ -132,7 +146,7 @@ public class SurveillanceFragment extends Fragment {
         super.onPause();
 
         // Disable Leanback mode (fullscreen)
-        Window window = getActivity().getWindow();
+        Window window = requireActivity().getWindow();
         if (window != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 final WindowInsetsController controller = window.getInsetsController();
@@ -150,28 +164,28 @@ public class SurveillanceFragment extends Fragment {
 
 
     private void addAllCameras() {
-        Settings settings = Settings.fromDisk(getContext());
-        List<Camera> cc = settings.getCameras();
+        Settings settings = Settings.fromDisk(requireActivity());
+        List<Camera> cc = settings.getEnabledCameras();
 
         int[] gridSize = calcGridDimensionsBasedOnNumberOfElements(cc.size());
         int camIdx = 0;
         for (int r = 0; r < gridSize[0]; r++) {
             // Create row and add to row container
-            LinearLayout row = new LinearLayout(getContext());
+            LinearLayout row = new LinearLayout(getContext());//几行
             binding.gridRowContainer.addView(row, rowLayoutParams);
             // Add camera viewers to the row
             for (int c = 0; c < gridSize[1]; c++) {
-                if ( camIdx < cc.size() ) {
+                if (camIdx < cc.size()) {
                     Camera cam = cc.get(camIdx);
-                    CameraView cv = addCameraView(cam, row);
+                    BaseCameraView cv = addCameraView(cam, row);//几列
                     cv.startPlayback();
-                    cv.setOnClickListener(new View.OnClickListener() {
+                    cv.fullScreen(new BaseCameraView.FullEvent() {
                         @Override
-                        public void onClick(View v) {
+                        public void fullOrNot(BaseCameraView baseCameraView) {
                             // Toggle single/multi camera views
                             fullscreenCameraView = !fullscreenCameraView;
                             if (fullscreenCameraView) {
-                                hideAllCameraViewsButNot(v);
+                                hideAllCameraViewsButNot(baseCameraView);
                             } else {
                                 showAllCameras();
                             }
@@ -190,7 +204,7 @@ public class SurveillanceFragment extends Fragment {
 
     private void disposeAllCameras() {
         // Destroy players, libs etc
-        for (CameraView cv : cameraViews) {
+        for (BaseCameraView cv : cameraViews) {
             cv.destroy();
         }
         cameraViews.clear();
@@ -198,23 +212,36 @@ public class SurveillanceFragment extends Fragment {
         binding.gridRowContainer.removeAllViews();
     }
 
-    protected void hideAllCameraViewsButNot(View cameraView) {
+    public void hideAllCameraViewsButNot(BaseCameraView baseCameraView) {
+        View cameraView;
+        if (baseCameraView.kind == VideoLibEnum.VLC)
+            cameraView = baseCameraView.surfaceView;
+        else
+            cameraView = baseCameraView.gsyVideoPlayer;
+
+        for (BaseCameraView cm : cameraViews) {//stop other VideoView
+            if (cm != baseCameraView) {
+                cm.stop();
+            }
+        }
+
         for (int i = 0; i < binding.gridRowContainer.getChildCount(); i++) {
             LinearLayout row = (LinearLayout) binding.gridRowContainer.getChildAt(i);
             boolean emptyRow = true;
             for (int j = 0; j < row.getChildCount(); j++) {
                 View cam = row.getChildAt(j);
-                if (cameraView == cam)
+                if (cameraView == cam) {
                     emptyRow = false;
-                else
+                } else {
                     cam.setLayoutParams(hiddenLayoutParams);
+                }
             }
             if (emptyRow)
                 row.setLayoutParams(hiddenLayoutParams);
         }
     }
 
-    protected void showAllCameras() {
+    public void showAllCameras() {
         for (int i = 0; i < binding.gridRowContainer.getChildCount(); i++) {
             LinearLayout row = (LinearLayout) binding.gridRowContainer.getChildAt(i);
             row.setLayoutParams(rowLayoutParams);
@@ -222,18 +249,38 @@ public class SurveillanceFragment extends Fragment {
                 View cam = row.getChildAt(j);
                 cam.setLayoutParams(cameraViewLayoutParams);
             }
+            for (BaseCameraView cameraView : cameraViews) {
+                cameraView.startPlayback();
+            }
         }
     }
 
-    private CameraView addCameraView(Camera camera, LinearLayout rowContainer) {
-        CameraView cv = new CameraView(
-                getContext(),
-                camera
-        );
-
+    /**
+     * 生成vlc版本的视频播放
+     */
+    private VlcCameraView genVlc(Camera camera, LinearLayout rowContainer) {
+        VlcCameraView cv = new VlcCameraView(requireActivity(), camera);
         // Add to layout
         rowContainer.addView(cv.surfaceView, cameraViewLayoutParams);
+        return cv;
+    }
+    /**
+     * 生成gsy版本的视频播放
+     */
+    private BaseCameraView genGsy(Camera camera, LinearLayout rowContainer) {
+        GsyCameraView cv = new GsyCameraView(requireActivity(), camera);
+        rowContainer.addView(cv.gsyVideoPlayer, cameraViewLayoutParams);
+        return cv;
+    }
 
+    private BaseCameraView addCameraView(Camera camera, LinearLayout rowContainer) {
+        BaseCameraView cv;
+        if (videoLibEnum.i != VideoLibEnum.VLC.i) {
+            cv = genGsy(camera, rowContainer);
+        } else {
+            cv = genVlc(camera, rowContainer);
+        }
+        cv.kind = videoLibEnum;
         cameraViews.add(cv);
         return cv;
     }
@@ -243,6 +290,7 @@ public class SurveillanceFragment extends Fragment {
      * Es: to display 3 elements is needed a 4-element grid, with 2 elements per side (a 2x2 grid)
      * Es: to display 6 elements is needed a 9-element grid, with 3 elements per side (a 2x3 grid)
      * Es: to display 7 elements is needed a 9-element grid, with 3 elements per side (a 3x3 grid)
+     *
      * @param elements
      */
     private int[] calcGridDimensionsBasedOnNumberOfElements(int elements) {
@@ -253,82 +301,6 @@ public class SurveillanceFragment extends Fragment {
             if (rows * cols >= elements) break;
             rows += 1;
         }
-        int[] dimensions = {rows, cols};
-        return dimensions;
-    }
-
-    /**
-     * Contains all entities (views and java entities) related to a camera stream viewer
-     */
-    private class CameraView {
-        protected SurfaceView surfaceView;
-        protected MediaPlayer mediaPlayer;
-        protected IVLCVout ivlcVout;
-        protected Camera camera;
-        protected LibVLC libvlc;
-
-        public CameraView(Context context, Camera camera) {
-            this.camera = camera;
-            this.libvlc = new LibVLC(context, new ArrayList<>(Arrays.asList(VLC_OPTIONS)));
-
-            surfaceView = new SurfaceView(context);
-            surfaceView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-                }
-            });
-            SurfaceHolder holder = surfaceView.getHolder();
-
-            holder.setKeepScreenOn(true);
-
-            // Create media player
-            mediaPlayer = new MediaPlayer(libvlc);
-
-            // Set up video output
-            ivlcVout = mediaPlayer.getVLCVout();
-            ivlcVout.setVideoView(surfaceView);
-            ivlcVout.attachViews();
-
-            // Load media and start playing
-            Media m = new Media(libvlc, Uri.parse(camera.getRtspUrl()));
-            mediaPlayer.setMedia(m);
-
-            // Register for view resize events
-            final ViewTreeObserver observer= surfaceView.getViewTreeObserver();
-            observer.addOnGlobalLayoutListener(() -> {
-                // Set rendering size
-                ivlcVout.setWindowSize(surfaceView.getWidth(), surfaceView.getHeight());
-            });
-        }
-
-        public void setOnClickListener(View.OnClickListener listener) {
-            surfaceView.setOnClickListener(listener);
-        }
-
-        /**
-         * Starts the playback.
-         */
-        public void startPlayback() {
-            mediaPlayer.play();
-        }
-
-        /**
-         * Destroys the object and frees the memory
-         */
-        public void destroy() {
-            if (libvlc == null) {
-                Log.e(TAG, this.toString() + " already destroyed");
-                return;
-            }
-
-            mediaPlayer.stop();
-            final IVLCVout vout = mediaPlayer.getVLCVout();
-            vout.detachViews();
-            libvlc.release();
-            libvlc = null;
-            mediaPlayer.release();
-            mediaPlayer = null;
-        }
+        return new int[]{rows, cols};
     }
 }
