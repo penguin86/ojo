@@ -1,11 +1,13 @@
 package it.danieleverducci.ojo.ui.adapters;
 
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import it.danieleverducci.ojo.R;
@@ -46,9 +48,10 @@ public class SettingsRecyclerViewAdapter extends RecyclerView.Adapter<SettingsRe
     public void onBindViewHolder(final ViewHolder holder, int position) {
         String cameraName = mValues.get(position).getName();
         if (cameraName == null || cameraName.length() == 0)
-            cameraName = holder.name.getContext().getString(R.string.stream_list_default_camera_name).replace("{camNo}", (position+1)+"");
+            cameraName = holder.name.getContext().getString(R.string.stream_list_default_camera_name).replace("{camNo}", (position + 1) + "");
         holder.name.setText(cameraName);
         holder.url.setText(mValues.get(position).getRtspUrl());
+        holder.enableSwitch.setChecked(mValues.get(position).getEnable() == 1);
 
         holder.root.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -56,12 +59,17 @@ public class SettingsRecyclerViewAdapter extends RecyclerView.Adapter<SettingsRe
                 clickListener.onItemClick(holder.getBindingAdapterPosition());
             }
         });
-
-        holder.deleteButton.setOnClickListener(new View.OnClickListener() {
+        setItemClick(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mValues.remove(holder.getBindingAdapterPosition());
                 notifyItemRemoved(holder.getBindingAdapterPosition());
+            }
+        }, holder.deleteButton);
+        holder.enableSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                mValues.get(holder.getBindingAdapterPosition()).setEnable(isChecked ? 1 : 0);
             }
         });
     }
@@ -101,6 +109,7 @@ public class SettingsRecyclerViewAdapter extends RecyclerView.Adapter<SettingsRe
     public void setOnDragListener(OnDragListener dragListener) {
         this.dragListener = dragListener;
     }
+
     public void setOnClickListener(OnClickListener clickListener) {
         this.clickListener = clickListener;
     }
@@ -115,6 +124,7 @@ public class SettingsRecyclerViewAdapter extends RecyclerView.Adapter<SettingsRe
         public TextView url;
         public View deleteButton;
         public View dragHandle;
+        public SwitchCompat enableSwitch;
 
         public ViewHolder(FragmentSettingsItemBinding binding) {
             super(binding.getRoot());
@@ -124,11 +134,20 @@ public class SettingsRecyclerViewAdapter extends RecyclerView.Adapter<SettingsRe
             this.url = binding.cameraUrl;
             this.deleteButton = binding.cameraDelete;
             this.dragHandle = binding.cameraDragHandle;
+            this.enableSwitch = binding.enableS;
         }
     }
 
     public interface OnDragListener {
         void onItemDrag(ViewHolder vh);
+    }
+
+    public void setItemClick(View.OnClickListener listener, View... view) {
+        if (view.length > 0) {
+            for (View value : view) {
+                value.setOnClickListener(listener);
+            }
+        }
     }
 
     public interface OnClickListener {

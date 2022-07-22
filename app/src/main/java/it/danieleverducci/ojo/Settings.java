@@ -13,6 +13,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 import it.danieleverducci.ojo.entities.Camera;
 
@@ -47,6 +48,16 @@ public class Settings implements Serializable {
 
     public List<Camera> getCameras() {
         return cameras;
+    }
+
+    public List<Camera> getEnabledCameras() {
+        List<Camera> result = new ArrayList<>();
+        for (int i = 0; i < cameras.size(); i++) {
+            if (cameras.get(i).getEnable() == 1) {
+                result.add(cameras.get(i));
+            }
+        }
+        return result;
     }
 
     public void setCameras(List<Camera> cameras) {

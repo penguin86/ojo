@@ -29,12 +29,12 @@ public class StreamUrlFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         // Load existing settings (if any)
-        settings = Settings.fromDisk(getContext());
+        settings = Settings.fromDisk(requireContext());
     }
 
     @Override
     public View onCreateView(
-            LayoutInflater inflater, ViewGroup container,
+            @NonNull LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState
     ) {
 
@@ -47,7 +47,7 @@ public class StreamUrlFragment extends Fragment {
 
             Camera c = settings.getCameras().get(this.selectedCamera);
             binding.streamName.setText(c.getName());
-            binding.streamName.setHint(getContext().getString(R.string.stream_list_default_camera_name).replace("{camNo}", (this.selectedCamera+1)+""));
+            binding.streamName.setHint(requireContext().getString(R.string.stream_list_default_camera_name).replace("{camNo}", (this.selectedCamera+1)+""));
             binding.streamUrl.setText(c.getRtspUrl());
         }
 

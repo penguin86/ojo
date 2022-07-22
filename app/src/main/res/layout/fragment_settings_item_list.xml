@@ -3,24 +3,63 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:background="@color/background_main"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
     <androidx.appcompat.widget.Toolbar
+        android:id="@+id/settingsToolbar"
+        style="@style/ToolBarStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/settingsToolbar"
-        app:title="@string/app_name"
-        style="@style/ToolBarStyle" />
+        app:title="@string/app_name" />
+
+    <RadioGroup
+        android:id="@+id/radio_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/exo_r"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:text="exoPlayer" />
+
+        <RadioButton
+            android:id="@+id/vlc_r"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:text="vlc" />
+
+        <RadioButton
+            android:id="@+id/ijk_r"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:text="ijkPlayer" />
+
+        <RadioButton
+            android:id="@+id/sys_r"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:text="mediaPlayer" />
+
+    </RadioGroup>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list"
         android:name="it.danieleverducci.ojo.ui.SettingsFragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
         android:layout_weight="1"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
         app:layoutManager="LinearLayoutManager"
         tools:context=".ui.SettingsFragment"
         tools:listitem="@layout/fragment_settings_item" />

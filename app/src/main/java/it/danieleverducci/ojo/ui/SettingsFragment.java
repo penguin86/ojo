@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RadioGroup;
 
 import java.util.List;
 
@@ -24,6 +25,7 @@ import it.danieleverducci.ojo.SharedPreferencesManager;
 import it.danieleverducci.ojo.databinding.FragmentSettingsItemListBinding;
 import it.danieleverducci.ojo.entities.Camera;
 import it.danieleverducci.ojo.ui.adapters.SettingsRecyclerViewAdapter;
+import it.danieleverducci.ojo.ui.videoplayer.VideoLibEnum;
 import it.danieleverducci.ojo.utils.ItemMoveCallback;
 
 /**
@@ -35,7 +37,7 @@ public class SettingsFragment extends Fragment {
     private Settings settings;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         binding = FragmentSettingsItemListBinding.inflate(inflater, container, false);
 
@@ -70,6 +72,33 @@ public class SettingsFragment extends Fragment {
                 return false;
             }
         });
+
+        binding.radioGroup.clearCheck();
+        int whichlib = SharedPreferencesManager.useWhichLib(this.getActivity());
+        if (whichlib == 1) {
+            binding.exoR.setChecked(true);
+        } else if (whichlib == 2)
+            binding.vlcR.setChecked(true);
+        else if (whichlib == 3)
+            binding.ijkR.setChecked(true);
+        else if (whichlib ==4)
+            binding.sysR.setChecked(true);
+
+        binding.radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                if (checkedId == R.id.exo_r) {
+                    SharedPreferencesManager.saveUseWhichLib(requireContext(), VideoLibEnum.EXO);
+                } else if (checkedId == R.id.vlc_r) {
+                    SharedPreferencesManager.saveUseWhichLib(requireContext(), VideoLibEnum.VLC);
+                } else if (checkedId == R.id.ijk_r) {
+                    SharedPreferencesManager.saveUseWhichLib(requireContext(), VideoLibEnum.IJK);
+                }else if (checkedId==R.id.sys_r){
+                    SharedPreferencesManager.saveUseWhichLib(requireContext(), VideoLibEnum.SYSTEM);
+                }
+            }
+        });
+
     }
 
     @Override

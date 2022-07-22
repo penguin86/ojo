@@ -24,4 +24,6 @@
     <string name="app_info_license_desc">This application is licensed under the GNU GENERAL PUBLIC LICENSE v3+. You can obtain a copy here: https://raw.githubusercontent.com/penguin86/ojo/master/LICENSE</string>
     <string name="app_info_repo_desc">The source code can be obtained at the github repository: https://github.com/penguin86/ojo</string>
     <string name="app_info_lib_desc">This app is made possible by the gourgeous vlc and vlc-android teams effort! You can know more or obtain the source code at https://code.videolan.org/videolan/vlc-android</string>
+    <string name="enable">enable</string>
+    <string name="app_info_lib_gsy">This app is made possible by the GSYVideoPlayer ! You can know more or obtain the source code at https://github.com/CarGuo/GSYVideoPlayer</string>
 </resources>

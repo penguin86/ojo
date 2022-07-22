@@ -46,4 +46,12 @@ dependencies {
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+
+    //GSYVideoPlayer
+    implementation 'com.shuyu:gsyVideoPlayer-java:8.1.2'
+    //是否需要ExoPlayer模式
+    implementation 'com.shuyu:GSYVideoPlayer-exo2:8.1.2'
+    //更多ijk的编码支持
+    implementation 'com.shuyu:gsyVideoPlayer-ex_so:8.1.2'
+
 }

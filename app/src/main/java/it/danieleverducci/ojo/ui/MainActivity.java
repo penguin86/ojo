@@ -8,9 +8,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 
-import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
+
+import com.shuyu.gsyvideoplayer.GSYVideoManager;
 
 import it.danieleverducci.ojo.R;
 import it.danieleverducci.ojo.SharedPreferencesManager;
@@ -35,7 +37,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         // Show FAB only on first fragment
-        navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
+        NavHostFragment navHostFragment =
+                (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_content_main);
+        assert navHostFragment != null;
+        navController = navHostFragment.getNavController();
+
         navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
             if (destination.getId() == R.id.HomeFragment)
                 binding.fab.show();
@@ -59,7 +65,29 @@ public class MainActivity extends AppCompatActivity {
     public void onBackPressed() {
         if (this.onBackButtonPressedListener != null && this.onBackButtonPressedListener.onBackPressed())
             return;
+        if (GSYVideoManager.backFromWindowFull(this)) {
+            return;
+        }
         super.onBackPressed();
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        GSYVideoManager.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        GSYVideoManager.onResume();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        GSYVideoManager.releaseAllVideos();
     }
 
     public void navigateToFragment(int actionId) {
