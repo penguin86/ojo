@@ -76,7 +76,8 @@ public class SurveillanceFragment extends Fragment {
                 1.0f
         );
 
-        hiddenLayoutParams = new LinearLayout.LayoutParams(0, 0);
+        // 1,1 instead of 0,0 because the latter doesn't work on android 13+
+        hiddenLayoutParams = new LinearLayout.LayoutParams(1, 1);
 
         binding = FragmentSurveillanceBinding.inflate(inflater, container, false);
         return binding.getRoot();
