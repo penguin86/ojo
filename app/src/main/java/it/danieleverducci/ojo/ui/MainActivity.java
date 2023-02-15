@@ -6,9 +6,7 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.util.Log;
-import android.view.View;
 
-import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
@@ -43,12 +41,7 @@ public class MainActivity extends AppCompatActivity {
                 binding.fab.hide();
         });
 
-        binding.fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                navigateToFragment(R.id.action_homeToSettings);
-            }
-        });
+        binding.fab.setOnClickListener(view -> navigateToFragment(R.id.action_homeToSettings));
     }
 
     public void setOnBackButtonPressedListener(OnBackButtonPressedListener onBackButtonPressedListener) {
