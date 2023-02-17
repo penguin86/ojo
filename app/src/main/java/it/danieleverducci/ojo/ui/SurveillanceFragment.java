@@ -12,10 +12,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
-import android.view.WindowInsets;
-import android.view.WindowInsetsController;
+import android.view.WindowManager;
 import android.widget.LinearLayout;
 
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.Fragment;
 
 import org.videolan.libvlc.IVLCVout;
@@ -26,6 +28,7 @@ import org.videolan.libvlc.MediaPlayer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import it.danieleverducci.ojo.R;
 import it.danieleverducci.ojo.Settings;
@@ -87,24 +90,7 @@ public class SurveillanceFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
-        // Leanback mode (fullscreen)
-        Window window = getActivity().getWindow();
-        if (window != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                final WindowInsetsController controller = window.getInsetsController();
-
-                if (controller != null)
-                    controller.hide(WindowInsets.Type.statusBars());
-            } else {
-                window.getDecorView().setSystemUiVisibility(
-                        View.SYSTEM_UI_FLAG_FULLSCREEN
-                                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                                | View.SYSTEM_UI_FLAG_IMMERSIVE
-                                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
-            }
-        }
+        leanbackMode(true);
 
         fullscreenCameraView = false;
         addAllCameras();
@@ -128,23 +114,46 @@ public class SurveillanceFragment extends Fragment {
         });
     }
 
+    /**
+     * Goes fullscreen igoring the device screen insets (camera etc)
+     */
+    private void leanbackMode(boolean leanback) {
+        Window w = requireActivity().getWindow();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P)
+            return;
+
+        if (leanback) {
+            // Iterface can go below notch
+            /*w.setFlags(
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+            );*/
+            w.getAttributes().layoutInDisplayCutoutMode =
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+
+            // Hide system bar
+            WindowInsetsControllerCompat windowInsetsController = WindowCompat.getInsetsController(w, w.getDecorView());
+            windowInsetsController.hide(WindowInsetsCompat.Type.systemBars());
+            // System bar is hidden when not touched for a while
+            windowInsetsController.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+        } else {
+            // Interface cannot go below notch
+            /*w.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+            w.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+            w.getAttributes().layoutInDisplayCutoutMode =
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;*/
+
+            // Show system bar
+            WindowInsetsControllerCompat windowInsetsController = WindowCompat.getInsetsController(w, w.getDecorView());
+            windowInsetsController.show(WindowInsetsCompat.Type.systemBars());
+        }
+    }
+
     @Override
     public void onPause() {
         super.onPause();
 
-        // Disable Leanback mode (fullscreen)
-        Window window = getActivity().getWindow();
-        if (window != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                final WindowInsetsController controller = window.getInsetsController();
-
-                if (controller != null)
-                    controller.show(WindowInsets.Type.statusBars());
-            } else {
-                window.getDecorView().setSystemUiVisibility(
-                        View.SYSTEM_UI_FLAG_VISIBLE);
-            }
-        }
+        leanbackMode(false);
 
         disposeAllCameras();
     }

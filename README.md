@@ -16,3 +16,7 @@ This app was specifically developed for F-Droid, as I couldn't find any open sou
 
 ![Screenshot 1](media/screenshots/1.png)      ![Screenshot 2](media/screenshots/2.png)      ![Screenshot 3](media/screenshots/3.png)
 
+## Contributors
+Thanks to [brenard](https://github.com/brenard) for the new grid sizing method
+Thanks to [davquar](https://github.com/davquar) for the fullscreen compatibility fix on Android 11
+

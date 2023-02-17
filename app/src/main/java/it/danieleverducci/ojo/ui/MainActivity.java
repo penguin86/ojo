@@ -1,11 +1,13 @@
 package it.danieleverducci.ojo.ui;
 
 import android.content.pm.ActivityInfo;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.util.Log;
+import android.view.WindowManager;
 
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -25,6 +27,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Interface can go below notches
+        if (Build.VERSION.SDK_INT >= 28) {
+            getWindow().setFlags(
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+            );
+        }
 
         rotationEnabledSetting = SharedPreferencesManager.loadRotationEnabled(this);
         this.setRequestedOrientation(this.rotationEnabledSetting ? ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR : ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);

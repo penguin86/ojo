@@ -6,7 +6,7 @@ android {
     compileSdkVersion 33
 
     defaultConfig {
-        applicationId "it.danieleverducci.ojo.googleplay"
+        applicationId "it.danieleverducci.ojo"
         minSdkVersion 21
         targetSdkVersion 33
         versionCode 6

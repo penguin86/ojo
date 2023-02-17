@@ -1,18 +1,20 @@
 {
-  "version": 2,
+  "version": 3,
   "artifactType": {
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "it.danieleverducci.ojo",
+  "applicationId": "it.danieleverducci.ojo.googleplay",
   "variantName": "release",
   "elements": [
     {
       "type": "SINGLE",
       "filters": [],
-      "versionCode": 4,
-      "versionName": "0.1.0",
+      "attributes": [],
+      "versionCode": 6,
+      "versionName": "0.1.1",
       "outputFile": "app-release.apk"
     }
-  ]
+  ],
+  "elementType": "File"
 }
