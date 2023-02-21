@@ -4,6 +4,8 @@
     <string name="first_fragment_label">First Fragment</string>
     <string name="second_fragment_label">Second Fragment</string>
 
+    <string name="fab_add_camera">Add</string>
+
     <string name="stream_list_default_camera_name">Unnamed camera {camNo}</string>
 
     <string name="add_stream_placeholder_url">rtsp://username:password@192.168.1.123:554</string>

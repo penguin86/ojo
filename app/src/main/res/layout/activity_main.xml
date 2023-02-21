@@ -14,7 +14,12 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
+        android:src="@drawable/ic_settings"
         app:srcCompat="@drawable/ic_settings"
-        app:tint="@color/purple_500"/>
+        app:tint="@color/fab_foreground"
+        android:tint="@color/fab_foreground"
+        android:backgroundTint="@color/fab_background"
+        android:hint="@string/fab_add_camera"
+        android:contentDescription="@string/fab_add_camera"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

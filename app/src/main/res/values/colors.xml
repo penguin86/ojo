@@ -5,4 +5,7 @@
     <color name="purple_700">#FF3700B3</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="fab_foreground">@color/purple_500</color>
+    <color name="fab_background">@color/purple_200</color>
 </resources>
