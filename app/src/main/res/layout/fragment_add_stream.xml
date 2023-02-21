@@ -17,7 +17,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="50dp"
-            android:src="@mipmap/ic_launcher_round"/>
+            android:background="@color/ic_launcher_background"
+            android:src="@drawable/ic_launcher_foreground"/>
 
         <TextView
             android:layout_width="match_parent"
