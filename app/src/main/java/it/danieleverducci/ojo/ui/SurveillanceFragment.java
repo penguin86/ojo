@@ -123,11 +123,6 @@ public class SurveillanceFragment extends Fragment {
             return;
 
         if (leanback) {
-            // Iterface can go below notch
-            /*w.setFlags(
-                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-            );*/
             w.getAttributes().layoutInDisplayCutoutMode =
                     WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 
@@ -137,15 +132,9 @@ public class SurveillanceFragment extends Fragment {
             // System bar is hidden when not touched for a while
             windowInsetsController.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
         } else {
-            // Interface cannot go below notch
-            /*w.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-            w.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-            w.getAttributes().layoutInDisplayCutoutMode =
-                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;*/
-
             // Show system bar
-            WindowInsetsControllerCompat windowInsetsController = WindowCompat.getInsetsController(w, w.getDecorView());
-            windowInsetsController.show(WindowInsetsCompat.Type.systemBars());
+            //WindowInsetsControllerCompat windowInsetsController = WindowCompat.getInsetsController(w, w.getDecorView());
+            //windowInsetsController.show(WindowInsetsCompat.Type.systemBars());
         }
     }
 

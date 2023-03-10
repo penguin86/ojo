@@ -11,11 +11,17 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Ojo">
         <activity
-            android:name=".ui.MainActivity"
-            android:label="@string/app_name"
+            android:name=".ui.SettingsActivity"
             android:exported="true"
-            android:theme="@style/Theme.Ojo"
-            android:configChanges="orientation|screenSize">
+            android:label="@string/app_name"
+            android:theme="@style/Theme.Ojo">
+        </activity>
+        <activity
+            android:name=".ui.MainActivity"
+            android:configChanges="orientation|screenSize"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.Ojo">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

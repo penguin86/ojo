@@ -3,18 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/HomeFragment">
+    app:startDestination="@id/SettingsFragment">
 
-    <fragment
-        android:id="@+id/HomeFragment"
-        android:name="it.danieleverducci.ojo.ui.SurveillanceFragment"
-        android:label="@string/first_fragment_label"
-        tools:layout="@layout/fragment_surveillance">
-
-        <action
-            android:id="@+id/action_homeToSettings"
-            app:destination="@id/SettingsFragment" />
-    </fragment>
     <fragment
         android:id="@+id/CameraUrlFragment"
         android:name="it.danieleverducci.ojo.ui.StreamUrlFragment"
@@ -30,9 +20,6 @@
         android:label="fragment_settings_item_list"
         tools:layout="@layout/fragment_settings_item_list" >
 
-        <action
-            android:id="@+id/action_settingsToHome"
-            app:destination="@id/HomeFragment" />
         <action
             android:id="@+id/action_settingsToCameraUrl"
             app:destination="@id/CameraUrlFragment" />

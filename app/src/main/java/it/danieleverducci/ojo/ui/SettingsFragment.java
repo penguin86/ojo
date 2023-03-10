@@ -48,7 +48,7 @@ public class SettingsFragment extends Fragment {
         binding.settingsToolbar.getOverflowIcon().setTint(Color.WHITE);
         binding.settingsToolbar.inflateMenu(R.menu.settings_menu);
         MenuItem rotMenuItem = binding.settingsToolbar.getMenu().findItem(R.id.menuitem_allow_rotation);
-        rotMenuItem.setTitle(((MainActivity)getActivity()).getRotationEnabledSetting() ? R.string.menuitem_deny_rotation : R.string.menuitem_allow_rotation);
+        rotMenuItem.setTitle(((SettingsActivity)getActivity()).getRotationEnabledSetting() ? R.string.menuitem_deny_rotation : R.string.menuitem_allow_rotation);
 
         // Register for item click
         binding.settingsToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
@@ -56,15 +56,15 @@ public class SettingsFragment extends Fragment {
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.menuitem_add_camera:
-                        ((MainActivity)getActivity()).navigateToFragment(R.id.action_settingsToCameraUrl);
+                        ((SettingsActivity)getActivity()).navigateToFragment(R.id.action_settingsToCameraUrl);
                         return true;
                     case R.id.menuitem_allow_rotation:
-                        ((MainActivity)getActivity()).toggleRotationEnabledSetting();
-                        SharedPreferencesManager.saveRotationEnabled(getContext(), ((MainActivity)getActivity()).getRotationEnabledSetting());
-                        item.setTitle(((MainActivity)getActivity()).getRotationEnabledSetting() ? R.string.menuitem_deny_rotation : R.string.menuitem_allow_rotation);
+                        ((SettingsActivity)getActivity()).toggleRotationEnabledSetting();
+                        SharedPreferencesManager.saveRotationEnabled(getContext(), ((SettingsActivity)getActivity()).getRotationEnabledSetting());
+                        item.setTitle(((SettingsActivity)getActivity()).getRotationEnabledSetting() ? R.string.menuitem_deny_rotation : R.string.menuitem_allow_rotation);
                         return true;
                     case R.id.menuitem_info:
-                        ((MainActivity)getActivity()).navigateToFragment(R.id.action_SettingsToInfoFragment);
+                        ((SettingsActivity)getActivity()).navigateToFragment(R.id.action_SettingsToInfoFragment);
                         return true;
                 }
                 return false;
@@ -96,7 +96,7 @@ public class SettingsFragment extends Fragment {
             public void onItemClick(int pos) {
                 Bundle b = new Bundle();
                 b.putInt(StreamUrlFragment.ARG_CAMERA, pos);
-                ((MainActivity)getActivity()).navigateToFragment(R.id.action_settingsToCameraUrl, b);
+                ((SettingsActivity)getActivity()).navigateToFragment(R.id.action_settingsToCameraUrl, b);
             }
         });
     }

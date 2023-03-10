@@ -15,4 +15,8 @@ public class SharedPreferencesManager {
         SharedPreferences sharedPref = ctx.getSharedPreferences(SP_ROTATION_ENABLED, Context.MODE_PRIVATE);
         return sharedPref.getBoolean(SP_ROTATION_ENABLED, false);
     }
+
+    public static void toggleRotationEnabled(Context ctx) {
+        saveRotationEnabled(ctx, ! loadRotationEnabled(ctx));
+    }
 }
