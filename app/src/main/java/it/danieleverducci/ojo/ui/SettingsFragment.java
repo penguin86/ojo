@@ -1,6 +1,7 @@
 package it.danieleverducci.ojo.ui;
 
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -45,7 +46,9 @@ public class SettingsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         // Setup toolbar
-        binding.settingsToolbar.getOverflowIcon().setTint(Color.WHITE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            binding.settingsToolbar.getOverflowIcon().setTint(Color.WHITE);
+        }
         binding.settingsToolbar.inflateMenu(R.menu.settings_menu);
         MenuItem rotMenuItem = binding.settingsToolbar.getMenu().findItem(R.id.menuitem_allow_rotation);
         rotMenuItem.setTitle(((SettingsActivity)getActivity()).getRotationEnabledSetting() ? R.string.menuitem_deny_rotation : R.string.menuitem_allow_rotation);

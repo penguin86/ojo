@@ -10,7 +10,8 @@
         android:id="@+id/fragment_surveillance"
         android:name="it.danieleverducci.ojo.ui.SurveillanceFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        tools:layout="@layout/fragment_surveillance" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
@@ -20,8 +21,8 @@
         android:layout_margin="@dimen/fab_margin"
         android:src="@drawable/ic_settings"
         app:srcCompat="@drawable/ic_settings"
-        app:tint="@color/fab_foreground"
-        android:tint="@color/fab_foreground"
+        app:tint="@color/white"
+        android:tint="@color/white"
         android:backgroundTint="@color/fab_background"
         android:hint="@string/fab_add_camera"
         android:contentDescription="@string/fab_add_camera"/>
