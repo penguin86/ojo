@@ -1,0 +1,2 @@
+L'app può essere aperta con intent url ojo://view
+Aggiunta compatibilità con vecchie versioni di Android >= 4.0.3

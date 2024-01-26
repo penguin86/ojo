@@ -1,0 +1,2 @@
+App can be opened with url intent ojo://view
+Backported to Android >= 4.0.3
