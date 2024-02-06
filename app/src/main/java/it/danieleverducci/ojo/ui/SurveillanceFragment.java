@@ -277,6 +277,7 @@ public class SurveillanceFragment extends Fragment {
 
                 }
             });
+            surfaceView.setOnFocusChangeListener((view, hasFocus) -> view.setBackgroundResource(hasFocus ? R.drawable.focus_border : 0));
             SurfaceHolder holder = surfaceView.getHolder();
 
             holder.setKeepScreenOn(true);
