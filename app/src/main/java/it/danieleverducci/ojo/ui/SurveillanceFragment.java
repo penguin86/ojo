@@ -1,6 +1,7 @@
 package it.danieleverducci.ojo.ui;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -28,7 +29,6 @@ import org.videolan.libvlc.MediaPlayer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 import it.danieleverducci.ojo.R;
 import it.danieleverducci.ojo.Settings;
@@ -99,6 +99,8 @@ public class SurveillanceFragment extends Fragment {
         for (CameraView cv : cameraViews) {
             cv.startPlayback();
         }
+
+        expandToCameraViewIfRequired();
 
         // Register for back pressed events
         ((MainActivity)getActivity()).setOnBackButtonPressedListener(new OnBackButtonPressedListener() {
@@ -254,6 +256,44 @@ public class SurveillanceFragment extends Fragment {
         }
         int[] dimensions = {rows, cols};
         return dimensions;
+    }
+
+    private void expandToCameraViewIfRequired() {
+        final String EXTRA_CAMERA_NUMBER = "it.danieleverducci.ojo.CAMERA_NUMBER";
+        final String EXTRA_CAMERA_NAME = "it.danieleverducci.ojo.CAMERA_NAME";
+        final String OPEN_CAMERA = "it.danieleverducci.ojo.OPEN_CAMERA";
+
+        if (this.getActivity() == null) {
+            return;
+        }
+
+        Intent intent = this.getActivity().getIntent();
+
+        if (OPEN_CAMERA.equals(intent.getAction())) {
+            String cameraName = intent.getStringExtra(EXTRA_CAMERA_NAME);
+            if (cameraName == null) {
+                int cameraNumber = intent.getIntExtra(EXTRA_CAMERA_NUMBER, 0) - 1;
+                expandByIndex(cameraNumber);
+                return;
+            }
+            expandByName(cameraName);
+        }
+    }
+
+    private void expandByIndex(int index) {
+        if (index < 0 || cameraViews.size() <= index) {
+            return;
+        }
+        hideAllCameraViewsButNot(cameraViews.get(index).surfaceView);
+    }
+
+    private void expandByName(String name) {
+        for(CameraView cameraView: cameraViews) {
+            if (cameraView.camera.getName().equals(name)) {
+                hideAllCameraViewsButNot(cameraView.surfaceView);
+                break;
+            }
+        }
     }
 
     /**
