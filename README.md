@@ -28,7 +28,7 @@ adb -s <YOUR_DEVICE> shell am start -a it.danieleverducci.ojo.OPEN_CAMERA -f 268
 ![Screenshot 1](media/screenshots/1.png)      ![Screenshot 2](media/screenshots/2.png)      ![Screenshot 3](media/screenshots/3.png)
 
 ## Contributors
-Thanks to [brenard](https://github.com/brenard) for the new grid sizing method
-Thanks to [davquar](https://github.com/davquar) for the fullscreen compatibility fix on Android 11
-Thanks to [jayfan0](https://github.com/jayfan0) for the first deep link implementation
-Thanks to [free-bots](https://github.com/free-bots) for the selection border on Android TV, intents for direct camera access and leanback support
+- Thanks to [brenard](https://github.com/brenard) for the new grid sizing method
+- Thanks to [davquar](https://github.com/davquar) for the fullscreen compatibility fix on Android 11
+- Thanks to [jayfan0](https://github.com/jayfan0) for the first deep link implementation
+- Thanks to [free-bots](https://github.com/free-bots) for the selection border on Android TV, intents for direct camera access and leanback support
