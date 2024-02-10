@@ -14,6 +14,17 @@ The maximum number of cameras is determined by the device's capabilities.
 The stream decoding and rendering is demanded to [VLC's library](https://code.videolan.org/videolan/vlc-android): without their effort this app wouldn't be possible.
 This app was specifically developed for F-Droid, as I couldn't find any open source RTSP vievers in the main repository.
 
+The app can be opened deeplinking to url ojo://view.
+To open the app with focus on a specific camera, you can use an intent (it.danieleverducci.ojo.OPEN_CAMERA) to specify which camera you want to view.
+The extra argument it.danieleverducci.ojo.CAMERA_NAME will open the app with the camera with the name you specified while adding the camera.
+The extra argument it.danieleverducci.ojo.CAMERA_NUMBER starting at 1 could be used as well, if you have multiple cameras with the same name.
+See belows example how to use the intent. The flag (-f 268468224) could be useful if you want to switch to an other camera while the app is running.
+```shell
+adb -s <YOUR_DEVICE> shell am start -a it.danieleverducci.ojo.OPEN_CAMERA -f 268468224 --es it.danieleverducci.ojo.CAMERA_NAME <YOUR_CAMERA_NAME>
+adb -s <YOUR_DEVICE> shell am start -a it.danieleverducci.ojo.OPEN_CAMERA -f 268468224 --es it.danieleverducci.ojo.CAMERA_NUMBER <YOUR_CAMERA_NUMBER>
+```
+
+
 ![Screenshot 1](media/screenshots/1.png)      ![Screenshot 2](media/screenshots/2.png)      ![Screenshot 3](media/screenshots/3.png)
 
 ## Contributors
