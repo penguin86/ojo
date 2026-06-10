@@ -2,10 +2,12 @@ package it.danieleverducci.ojo.ui;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -14,6 +16,10 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import androidx.core.view.WindowCompat;
@@ -21,10 +27,10 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.Fragment;
 
-//import org.videolan.libvlc.IVLCVout;
 import org.videolan.libvlc.LibVLC;
 import org.videolan.libvlc.Media;
 import org.videolan.libvlc.MediaPlayer;
+import org.videolan.libvlc.interfaces.IVLCVout;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,7 +51,9 @@ public class SurveillanceFragment extends Fragment {
 
     final static private String TAG = "SurveillanceFragment";
     final static private String[] VLC_OPTIONS = new String[]{
-            "--aout=opensles",
+            // Default AudioTrack output: opensles does not support
+            // software volume (setVolume/getVolume), which mute relies on
+            //"--aout=opensles",
             //"--audio-time-stretch", // time stretching
             //"-vvv", // verbosity
             "--avcodec-codec=h264",
@@ -54,6 +62,7 @@ public class SurveillanceFragment extends Fragment {
     };
 
     private FragmentSurveillanceBinding binding;
+    private Settings settings;
     private List<CameraView> cameraViews = new ArrayList<>();
     private boolean fullscreenCameraView = false;
     private LinearLayout.LayoutParams cameraViewLayoutParams;
@@ -94,11 +103,6 @@ public class SurveillanceFragment extends Fragment {
 
         fullscreenCameraView = false;
         addAllCameras();
-
-        // Start playback for all streams
-        for (CameraView cv : cameraViews) {
-            cv.startPlayback();
-        }
 
         expandToCameraViewIfRequired();
 
@@ -151,7 +155,7 @@ public class SurveillanceFragment extends Fragment {
 
 
     private void addAllCameras() {
-        Settings settings = Settings.fromDisk(getContext());
+        settings = Settings.fromDisk(getContext());
         List<Camera> cc = settings.getCameras();
 
         int[] gridSize = calcGridDimensionsBasedOnNumberOfElements(cc.size());
@@ -166,16 +170,24 @@ public class SurveillanceFragment extends Fragment {
                     Camera cam = cc.get(camIdx);
                     CameraView cv = addCameraView(cam, row);
                     cv.startPlayback();
-                    cv.setOnClickListener(new View.OnClickListener() {
+                    cv.container.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             // Toggle single/multi camera views
                             fullscreenCameraView = !fullscreenCameraView;
                             if (fullscreenCameraView) {
-                                hideAllCameraViewsButNot(v);
+                                // Going fullscreen - make this view fill the screen
+                                ViewGroup.LayoutParams params = cv.container.getLayoutParams();
+                                params.width = ViewGroup.LayoutParams.MATCH_PARENT;
+                                params.height = ViewGroup.LayoutParams.MATCH_PARENT;
+                                cv.container.setLayoutParams(params);
+                                hideAllCameraViewsButNot(cv.container);
                             } else {
+                                // Going back to grid - restore original layout params
+                                cv.container.setLayoutParams(cv.originalLayoutParams);
                                 showAllCameras();
                             }
+                            cv.setMuteButtonPosition(fullscreenCameraView);
                         }
                     });
                 } else {
@@ -202,26 +214,33 @@ public class SurveillanceFragment extends Fragment {
     protected void hideAllCameraViewsButNot(View cameraView) {
         for (int i = 0; i < binding.gridRowContainer.getChildCount(); i++) {
             LinearLayout row = (LinearLayout) binding.gridRowContainer.getChildAt(i);
-            boolean emptyRow = true;
+            boolean found = false;
             for (int j = 0; j < row.getChildCount(); j++) {
-                View cam = row.getChildAt(j);
-                if (cameraView == cam)
-                    emptyRow = false;
-                else
-                    cam.setLayoutParams(hiddenLayoutParams);
+                View child = row.getChildAt(j);
+                if (child == cameraView) {
+                    found = true;
+                } else {
+                    child.setVisibility(View.GONE);
+                }
             }
-            if (emptyRow)
-                row.setLayoutParams(hiddenLayoutParams);
+            if (!found) {
+                row.setVisibility(View.GONE);
+            }
         }
     }
 
     protected void showAllCameras() {
+        // Restore original layout parameters for all camera views
+        for (CameraView cv : cameraViews) {
+            cv.container.setLayoutParams(cv.originalLayoutParams);
+        }
+
         for (int i = 0; i < binding.gridRowContainer.getChildCount(); i++) {
             LinearLayout row = (LinearLayout) binding.gridRowContainer.getChildAt(i);
-            row.setLayoutParams(rowLayoutParams);
+            row.setVisibility(View.VISIBLE);
             for (int j = 0; j < row.getChildCount(); j++) {
-                View cam = row.getChildAt(j);
-                cam.setLayoutParams(cameraViewLayoutParams);
+                View child = row.getChildAt(j);
+                child.setVisibility(View.VISIBLE);
             }
         }
     }
@@ -232,10 +251,120 @@ public class SurveillanceFragment extends Fragment {
                 camera
         );
 
-        // Add to layout
-        rowContainer.addView(cv.surfaceView, cameraViewLayoutParams);
+        // Create a container FrameLayout for the SurfaceView and mute button
+        FrameLayout container = new FrameLayout(getContext());
+        container.setLayoutParams(cameraViewLayoutParams);
+        cv.container = container;
+        cv.originalLayoutParams = cameraViewLayoutParams;
+
+        // SurfaceView for video
+        cv.surfaceView = new SurfaceView(getContext());
+        cv.surfaceView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Toggle single/multi camera views
+                fullscreenCameraView = !fullscreenCameraView;
+                if (fullscreenCameraView) {
+                    // Going fullscreen - make this view fill the screen
+                    ViewGroup.LayoutParams params = cv.container.getLayoutParams();
+                    params.width = ViewGroup.LayoutParams.MATCH_PARENT;
+                    params.height = ViewGroup.LayoutParams.MATCH_PARENT;
+                    cv.container.setLayoutParams(params);
+                    hideAllCameraViewsButNot(cv.container);
+                } else {
+                    // Going back to grid - restore original layout params
+                    cv.container.setLayoutParams(cv.originalLayoutParams);
+                    showAllCameras();
+                }
+                cv.setMuteButtonPosition(fullscreenCameraView);
+            }
+        });
+        cv.surfaceView.setOnFocusChangeListener((view, hasFocus) -> view.setBackgroundResource(hasFocus ? R.drawable.focus_border : 0));
+        // Set up SurfaceHolder callback so VLC reattaches after surface resize
+        cv.surfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
+            @Override
+            public void surfaceCreated(SurfaceHolder holder) {
+                if (cv.mediaPlayer == null) return;
+                IVLCVout vout = cv.mediaPlayer.getVLCVout();
+                if (vout.areViewsAttached()) vout.detachViews();
+                vout.setVideoView(cv.surfaceView);
+                vout.attachViews();
+            }
+
+            @Override
+            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+                if (cv.mediaPlayer != null) {
+                    cv.mediaPlayer.getVLCVout().setWindowSize(width, height);
+                }
+            }
+
+            @Override
+            public void surfaceDestroyed(SurfaceHolder holder) {
+                if (cv.mediaPlayer != null) {
+                    // Detach only — do NOT stop. VLC keeps buffering internally
+                    // and will resume rendering when the surface is recreated.
+                    cv.mediaPlayer.getVLCVout().detachViews();
+                }
+            }
+        });
+        container.addView(cv.surfaceView);
+
+        // Mute button
+        cv.muteButton = new ImageButton(getContext());
+        cv.muteButton.setBackgroundColor(0x66000000);
+        cv.muteButton.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        int btnSize = DpiUtils.DpToPixels(getContext(), 32);
+        int btnPadding = DpiUtils.DpToPixels(getContext(), 4);
+        cv.muteButton.setPadding(btnPadding, btnPadding, btnPadding, btnPadding);
+        FrameLayout.LayoutParams btnParams = new FrameLayout.LayoutParams(
+                btnSize, btnSize, Gravity.TOP | Gravity.START);
+        cv.muteButton.setLayoutParams(btnParams);
+        cv.setMuteButtonPosition(false);
+        cv.updateMuteButton();
+        cv.muteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (cv.hasAudio) {
+                    cv.isMuted = !cv.isMuted;
+                    // Software volume: unlike setAudioTrack(-1), this doesn't
+                    // shut down the audio output, so it can be toggled back on
+                    cv.mediaPlayer.setVolume(cv.isMuted ? 0 : 100);
+                    cv.updateMuteButton();
+                    // Persist mute state across restarts
+                    cv.camera.setMuted(cv.isMuted);
+                    settings.save();
+                }
+            }
+        });
+        container.addView(cv.muteButton);
+
+        // Create media player
+        cv.mediaPlayer = new MediaPlayer(cv.libvlc);
+
+        // Listen for ES (elementary stream) added events to detect audio tracks
+        cv.mediaPlayer.setEventListener(new MediaPlayer.EventListener() {
+            @Override
+            public void onEvent(MediaPlayer.Event event) {
+                if (event.type == MediaPlayer.Event.ESAdded) {
+                    if (cv.mediaPlayer.getAudioTracksCount() > 0 && !cv.hasAudio) {
+                        cv.hasAudio = true;
+                        cv.audioTrackId = cv.mediaPlayer.getAudioTrack();
+                        if (cv.camera.isMuted()) {
+                            cv.isMuted = true;
+                            cv.muteButton.post(() -> cv.applyMuteWithRetry(0));
+                        }
+                        cv.muteButton.post(() -> cv.updateMuteButton());
+                    }
+                }
+            }
+        });
+
+        // Load media
+        Media m = new Media(cv.libvlc, Uri.parse(camera.getRtspUrl()));
+        cv.mediaPlayer.setMedia(m);
 
         cameraViews.add(cv);
+        rowContainer.addView(container);
         return cv;
     }
 
@@ -284,13 +413,24 @@ public class SurveillanceFragment extends Fragment {
         if (index < 0 || cameraViews.size() <= index) {
             return;
         }
-        hideAllCameraViewsButNot(cameraViews.get(index).surfaceView);
+        // Going fullscreen - make this view fill the screen
+        CameraView cv = cameraViews.get(index);
+        ViewGroup.LayoutParams params = cv.container.getLayoutParams();
+        params.width = ViewGroup.LayoutParams.MATCH_PARENT;
+        params.height = ViewGroup.LayoutParams.MATCH_PARENT;
+        cv.container.setLayoutParams(params);
+        hideAllCameraViewsButNot(cv.container);
     }
 
     private void expandByName(String name) {
         for(CameraView cameraView: cameraViews) {
             if (cameraView.camera.getName().equals(name)) {
-                hideAllCameraViewsButNot(cameraView.surfaceView);
+                // Going fullscreen - make this view fill the screen
+                ViewGroup.LayoutParams params = cameraView.container.getLayoutParams();
+                params.width = ViewGroup.LayoutParams.MATCH_PARENT;
+                params.height = ViewGroup.LayoutParams.MATCH_PARENT;
+                cameraView.container.setLayoutParams(params);
+                hideAllCameraViewsButNot(cameraView.container);
                 break;
             }
         }
@@ -304,51 +444,61 @@ public class SurveillanceFragment extends Fragment {
         protected MediaPlayer mediaPlayer;
         protected Camera camera;
         protected LibVLC libvlc;
+        protected ImageButton muteButton;
+        protected boolean hasAudio = false;
+        protected boolean isMuted = false;
+        protected int audioTrackId = -1;
+        protected FrameLayout container;
+        protected ViewGroup.LayoutParams originalLayoutParams;
+        protected boolean playbackStarted = false;
 
         public CameraView(Context context, Camera camera) {
             this.camera = camera;
             this.libvlc = new LibVLC(context, new ArrayList<>(Arrays.asList(VLC_OPTIONS)));
-
-            surfaceView = new SurfaceView(context);
-            surfaceView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-                }
-            });
-            surfaceView.setOnFocusChangeListener((view, hasFocus) -> view.setBackgroundResource(hasFocus ? R.drawable.focus_border : 0));
-            SurfaceHolder holder = surfaceView.getHolder();
-
-            holder.setKeepScreenOn(true);
-
-            // Create media player
-            mediaPlayer = new MediaPlayer(libvlc);
-
-            // Set up video output - using surface directly
-            mediaPlayer.getVLCVout().setVideoView(surfaceView);
-            mediaPlayer.getVLCVout().attachViews();
-
-            // Load media and start playing
-            Media m = new Media(libvlc, Uri.parse(camera.getRtspUrl()));
-            mediaPlayer.setMedia(m);
-
-            // Register for view resize events
-            final ViewTreeObserver observer= surfaceView.getViewTreeObserver();
-            observer.addOnGlobalLayoutListener(() -> {
-                if (mediaPlayer != null) {
-                    mediaPlayer.getVLCVout().setWindowSize(surfaceView.getWidth(), surfaceView.getHeight());
-                }
-            });
         }
 
-        public void setOnClickListener(View.OnClickListener listener) {
-            surfaceView.setOnClickListener(listener);
+        private void updateMuteButton() {
+            if (!hasAudio) {
+                muteButton.setImageResource(R.drawable.ic_music_off);
+                muteButton.setColorFilter(Color.GRAY); // No audio available
+            } else if (isMuted) {
+                muteButton.setImageResource(R.drawable.ic_music_off);
+                muteButton.setColorFilter(Color.RED); // Muted
+            } else {
+                muteButton.setImageResource(R.drawable.ic_music_note);
+                muteButton.setColorFilter(Color.GREEN); // Playing with audio
+            }
+        }
+
+        /**
+         * Moves the mute button: in fullscreen it is shifted down and right
+         * to clear curved screen corners.
+         */
+        protected void setMuteButtonPosition(boolean fullscreen) {
+            FrameLayout.LayoutParams p = (FrameLayout.LayoutParams) muteButton.getLayoutParams();
+            int margin = DpiUtils.DpToPixels(muteButton.getContext(), fullscreen ? 24 : 4);
+            p.setMargins(margin, margin, 0, 0);
+            muteButton.setLayoutParams(p);
+        }
+
+        /**
+         * Applies the persisted mute state. The audio output may not be
+         * initialized yet when the audio track is first detected, in which
+         * case setVolume doesn't take effect: verify and retry.
+         */
+        protected void applyMuteWithRetry(int attempt) {
+            if (mediaPlayer == null || !isMuted) return;
+            mediaPlayer.setVolume(0);
+            if (mediaPlayer.getVolume() != 0 && attempt < 10) {
+                muteButton.postDelayed(() -> applyMuteWithRetry(attempt + 1), 300);
+            }
         }
 
         /**
          * Starts the playback.
          */
         public void startPlayback() {
+            playbackStarted = true;
             mediaPlayer.play();
         }
 
@@ -361,6 +511,7 @@ public class SurveillanceFragment extends Fragment {
                 return;
             }
 
+            playbackStarted = false;
             mediaPlayer.stop();
             mediaPlayer.getVLCVout().detachViews();
             libvlc.release();
