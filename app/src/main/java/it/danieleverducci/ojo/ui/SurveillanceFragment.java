@@ -105,7 +105,8 @@ public class SurveillanceFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
-        leanbackMode(true);
+        // Grid view keeps the system bars; leanback only in single camera view
+        leanbackMode(false);
 
         fullscreenCameraView = false;
         addAllCameras();
@@ -118,6 +119,7 @@ public class SurveillanceFragment extends Fragment {
             public boolean onBackPressed() {
                 if(fullscreenCameraView && cameraViews.size() > 1) {
                     fullscreenCameraView = false;
+                    leanbackMode(false);
                     showAllCameras();
                     return true;
                 }
@@ -127,26 +129,34 @@ public class SurveillanceFragment extends Fragment {
     }
 
     /**
-     * Goes fullscreen igoring the device screen insets (camera etc)
+     * Leanback (single camera view): hides the system bars and draws below
+     * the notch and screen insets. Non-leanback (grid view): system bars
+     * stay visible and the layout fits between them.
      */
     private void leanbackMode(boolean leanback) {
         Window w = requireActivity().getWindow();
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P)
             return;
 
+        WindowInsetsControllerCompat windowInsetsController = WindowCompat.getInsetsController(w, w.getDecorView());
         if (leanback) {
+            // Draw below notches and screen insets
+            w.setFlags(
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
             w.getAttributes().layoutInDisplayCutoutMode =
                     WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 
             // Hide system bar
-            WindowInsetsControllerCompat windowInsetsController = WindowCompat.getInsetsController(w, w.getDecorView());
             windowInsetsController.hide(WindowInsetsCompat.Type.systemBars());
             // System bar is hidden when not touched for a while
             windowInsetsController.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
         } else {
-            // Show system bar
-            //WindowInsetsControllerCompat windowInsetsController = WindowCompat.getInsetsController(w, w.getDecorView());
-            //windowInsetsController.show(WindowInsetsCompat.Type.systemBars());
+            // Show system bar and fit the layout between the bars
+            w.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+            w.getAttributes().layoutInDisplayCutoutMode =
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
+            windowInsetsController.show(WindowInsetsCompat.Type.systemBars());
         }
     }
 
@@ -413,6 +423,7 @@ public class SurveillanceFragment extends Fragment {
      */
     private void toggleFullscreen(CameraView cv) {
         fullscreenCameraView = !fullscreenCameraView;
+        leanbackMode(fullscreenCameraView);
         if (fullscreenCameraView) {
             // Going fullscreen - make this view fill the screen
             ViewGroup.LayoutParams params = cv.container.getLayoutParams();
@@ -482,6 +493,7 @@ public class SurveillanceFragment extends Fragment {
         cv.container.setLayoutParams(params);
         hideAllCameraViewsButNot(cv.container);
         fullscreenCameraView = true;
+        leanbackMode(true);
         cv.setMuteButtonPosition(true);
     }
 
@@ -495,6 +507,7 @@ public class SurveillanceFragment extends Fragment {
                 cameraView.container.setLayoutParams(params);
                 hideAllCameraViewsButNot(cameraView.container);
                 fullscreenCameraView = true;
+                leanbackMode(true);
                 cameraView.setMuteButtonPosition(true);
                 break;
             }
