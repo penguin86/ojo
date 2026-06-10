@@ -7,7 +7,7 @@ android {
 
     defaultConfig {
         applicationId "it.danieleverducci.ojo"
-        minSdkVersion 15
+        minSdkVersion 17
         targetSdkVersion 33
         versionCode 9
         versionName "0.1.4"
@@ -39,7 +39,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.8.0'
     implementation 'androidx.navigation:navigation-fragment:2.5.3'
     implementation 'androidx.navigation:navigation-ui:2.5.3'
-    implementation 'de.mrmaffen:libvlc-android:2.1.12@aar'
+    implementation 'org.videolan.android:libvlc-all:3.4.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     testImplementation 'junit:junit:4.+'

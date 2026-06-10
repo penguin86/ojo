@@ -20,6 +20,8 @@
     <string name="menuitem_deny_rotation">Landscape only</string>
     <string name="menuitem_info">Info</string>
     <string name="menuitem_add_camera">Add</string>
+    <string name="menuitem_export_config">Export Configuration</string>
+    <string name="menuitem_import_config">Import Configuration</string>
 
     <string name="app_info_title">About Ojo</string>
     <string name="app_info_creator_desc">Created by Daniele Verducci.</string>

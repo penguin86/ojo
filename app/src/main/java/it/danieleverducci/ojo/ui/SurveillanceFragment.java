@@ -21,7 +21,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.Fragment;
 
-import org.videolan.libvlc.IVLCVout;
+//import org.videolan.libvlc.IVLCVout;
 import org.videolan.libvlc.LibVLC;
 import org.videolan.libvlc.Media;
 import org.videolan.libvlc.MediaPlayer;
@@ -302,7 +302,6 @@ public class SurveillanceFragment extends Fragment {
     private class CameraView {
         protected SurfaceView surfaceView;
         protected MediaPlayer mediaPlayer;
-        protected IVLCVout ivlcVout;
         protected Camera camera;
         protected LibVLC libvlc;
 
@@ -325,10 +324,9 @@ public class SurveillanceFragment extends Fragment {
             // Create media player
             mediaPlayer = new MediaPlayer(libvlc);
 
-            // Set up video output
-            ivlcVout = mediaPlayer.getVLCVout();
-            ivlcVout.setVideoView(surfaceView);
-            ivlcVout.attachViews();
+            // Set up video output - using surface directly
+            mediaPlayer.getVLCVout().setVideoView(surfaceView);
+            mediaPlayer.getVLCVout().attachViews();
 
             // Load media and start playing
             Media m = new Media(libvlc, Uri.parse(camera.getRtspUrl()));
@@ -337,8 +335,9 @@ public class SurveillanceFragment extends Fragment {
             // Register for view resize events
             final ViewTreeObserver observer= surfaceView.getViewTreeObserver();
             observer.addOnGlobalLayoutListener(() -> {
-                // Set rendering size
-                ivlcVout.setWindowSize(surfaceView.getWidth(), surfaceView.getHeight());
+                if (mediaPlayer != null) {
+                    mediaPlayer.getVLCVout().setWindowSize(surfaceView.getWidth(), surfaceView.getHeight());
+                }
             });
         }
 
@@ -363,8 +362,7 @@ public class SurveillanceFragment extends Fragment {
             }
 
             mediaPlayer.stop();
-            final IVLCVout vout = mediaPlayer.getVLCVout();
-            vout.detachViews();
+            mediaPlayer.getVLCVout().detachViews();
             libvlc.release();
             libvlc = null;
             mediaPlayer.release();

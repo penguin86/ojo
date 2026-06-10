@@ -72,4 +72,8 @@ public class Settings implements Serializable {
         }
         return false;
     }
+
+    public static String getFileName() {
+        return FILENAME;
+    }
 }

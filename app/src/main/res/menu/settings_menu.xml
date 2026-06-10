@@ -7,6 +7,14 @@
         android:title="@string/menuitem_add_camera"
         app:showAsAction="always"/>
 
+    <item android:id="@+id/menuitem_export_config"
+        android:title="@string/menuitem_export_config"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/menuitem_import_config"
+        android:title="@string/menuitem_import_config"
+        app:showAsAction="never"/>
+
     <item android:id="@+id/menuitem_allow_rotation"
         android:title="@string/menuitem_allow_rotation"
         app:showAsAction="never"/>
