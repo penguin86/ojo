@@ -166,6 +166,14 @@ public class SurveillanceFragment extends Fragment {
 
         leanbackMode(false);
 
+        // Detach gesture listeners before destroying cameras to avoid
+        // touch events firing on detached views
+        for (CameraView cv : cameraViews) {
+            if (cv.container != null) {
+                cv.container.setOnTouchListener(null);
+            }
+        }
+
         disposeAllCameras();
     }
 
