@@ -2,6 +2,8 @@
 
 # Ojo: the FLOSS RTSP Surveillance camera viewer for Android
 
+> This project was moved to [my private git server](https://git.ichibi.eu/penguin86/ojo) . This repository may not be up to date.
+
 [<img src="https://raw.githubusercontent.com/andOTP/andOTP/master/assets/badges/get-it-on-github.png" height="80">](https://github.com/penguin86/ojo/releases/latest) 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="80">](https://f-droid.org/it/packages/it.danieleverducci.ojo)
 
@@ -32,3 +34,13 @@ adb -s <YOUR_DEVICE> shell am start -a it.danieleverducci.ojo.OPEN_CAMERA -f 268
 - Thanks to [davquar](https://github.com/davquar) for the fullscreen compatibility fix on Android 11
 - Thanks to [jayfan0](https://github.com/jayfan0) for the first deep link implementation
 - Thanks to [free-bots](https://github.com/free-bots) for the selection border on Android TV, intents for direct camera access and leanback support
+
+## How to contribute
+
+The project is open to contribution, but with some limits:
+
+- I'm sorry I can't accept AI-generated contributions. Reviewing a contribution requires time and effort from my side, while generating code with AI requires very little time and produces non reliable code that must be reviewed in detail. This is effectively shifting the work on my side, and in a forced way. If you feel you need a feature but you're not able to implement it by yourself, I prefer you to create an issue in the repository so I can implement it when I can, in a more mantainable way.
+- Before implementing a big change, please contact me to ensure it goes in the project's direction.
+
+To contribute, you'll have to create an account on the git instance https://git.ichibi.eu. Unfortunately, I had to disable registration to avoid huge waves of fake accounts created by bots.
+You can request an account writing to daniele.verducci@ichibi.eu
