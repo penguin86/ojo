@@ -41,6 +41,8 @@ The project is open to contribution, but with some limits:
 
 - I'm sorry I can't accept AI-generated contributions. Reviewing a contribution requires time and effort from my side, while generating code with AI requires very little time and produces non reliable code that must be reviewed in detail. This is effectively shifting the work on my side, and in a forced way. If you feel you need a feature but you're not able to implement it by yourself, I prefer you to create an issue in the repository so I can implement it when I can, in a more mantainable way.
 - Before implementing a big change, please contact me to ensure it goes in the project's direction.
+- If working on an existing ticket, please name the branch accordingly (feature/ticketNumber, bugfix/ticketNumber...).
+- Only issue pull requests to the develop branch, never on the main/master one.
 
-To contribute, you'll have to create an account on the git instance https://git.ichibi.eu. Unfortunately, I had to disable registration to avoid huge waves of fake accounts created by bots.
-You can request an account writing to daniele.verducci@ichibi.eu
+Please see the main repository README file on how to obtain an account to my git instance.
+
