@@ -432,6 +432,14 @@ public class SurveillanceFragment extends Fragment {
     private void toggleFullscreen(CameraView cv) {
         fullscreenCameraView = !fullscreenCameraView;
         leanbackMode(fullscreenCameraView);
+
+        // Keep screen on in single-camera view
+        Window w = requireActivity().getWindow();
+        if (fullscreenCameraView) {
+            w.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        } else {
+            w.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
         if (fullscreenCameraView) {
             // Going fullscreen - make this view fill the screen
             ViewGroup.LayoutParams params = cv.container.getLayoutParams();
@@ -495,6 +503,9 @@ public class SurveillanceFragment extends Fragment {
         }
         // Going fullscreen - make this view fill the screen
         CameraView cv = cameraViews.get(index);
+
+        // Keep screen on in single-camera view
+        requireActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         ViewGroup.LayoutParams params = cv.container.getLayoutParams();
         params.width = ViewGroup.LayoutParams.MATCH_PARENT;
         params.height = ViewGroup.LayoutParams.MATCH_PARENT;
@@ -510,6 +521,9 @@ public class SurveillanceFragment extends Fragment {
             if (cameraView.camera.getName().equals(name)) {
                 // Going fullscreen - make this view fill the screen
                 ViewGroup.LayoutParams params = cameraView.container.getLayoutParams();
+
+                // Keep screen on in single-camera view
+                requireActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                 params.width = ViewGroup.LayoutParams.MATCH_PARENT;
                 params.height = ViewGroup.LayoutParams.MATCH_PARENT;
                 cameraView.container.setLayoutParams(params);
