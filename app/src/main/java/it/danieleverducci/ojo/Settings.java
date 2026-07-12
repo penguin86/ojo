@@ -30,9 +30,7 @@ public class Settings implements Serializable {
     public static Settings fromDisk(Context context) {
         String filePath = context.getFilesDir() + File.separator + FILENAME;
         Settings s = new Settings();
-        try {
-            FileInputStream fin = new FileInputStream(filePath);
-            ObjectInputStream ois = new ObjectInputStream(fin);
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filePath))) {
             s = (Settings) ois.readObject();
         } catch (FileNotFoundException e) {
             Log.d(TAG, "No saved settings found, will create a new one");
@@ -43,6 +41,19 @@ public class Settings implements Serializable {
         }
         s.settingsFilePath = filePath;
         return s;
+    }
+
+    /**
+     * Reads and deserializes a settings file, or returns null if the file
+     * is not a valid serialized Settings object.
+     */
+    public static Settings fromFile(File file) {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
+            return (Settings) ois.readObject();
+        } catch (IOException | ClassNotFoundException | ClassCastException e) {
+            Log.e(TAG, "Not a valid settings file: " + e.toString());
+            return null;
+        }
     }
 
     public List<Camera> getCameras() {
@@ -58,12 +69,10 @@ public class Settings implements Serializable {
     }
 
     public boolean save() {
-        try {
-            FileOutputStream fout = new FileOutputStream(settingsFilePath);
-            ObjectOutputStream oos = new ObjectOutputStream(fout);
+        // try-with-resources closes the ObjectOutputStream first, flushing
+        // its buffer into the file before the underlying stream is closed
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(settingsFilePath))) {
             oos.writeObject(this);
-            fout.close();
-            oos.close();
             return true;
         } catch (FileNotFoundException e) {
             Log.e(TAG, "Unable to create file " + settingsFilePath + ": " + e.toString());

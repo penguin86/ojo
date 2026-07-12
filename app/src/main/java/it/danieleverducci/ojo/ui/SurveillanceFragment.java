@@ -120,6 +120,7 @@ public class SurveillanceFragment extends Fragment {
                 if(fullscreenCameraView && cameraViews.size() > 1) {
                     fullscreenCameraView = false;
                     leanbackMode(false);
+                    requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                     showAllCameras();
                     return true;
                 }
@@ -406,7 +407,6 @@ public class SurveillanceFragment extends Fragment {
                 if (event.type == MediaPlayer.Event.ESAdded) {
                     if (cv.mediaPlayer.getAudioTracksCount() > 0 && !cv.hasAudio) {
                         cv.hasAudio = true;
-                        cv.audioTrackId = cv.mediaPlayer.getAudioTrack();
                         if (cv.camera.isMuted()) {
                             cv.isMuted = true;
                             cv.muteButton.post(() -> cv.applyMuteWithRetry(0));
@@ -487,6 +487,9 @@ public class SurveillanceFragment extends Fragment {
         Intent intent = this.getActivity().getIntent();
 
         if (OPEN_CAMERA.equals(intent.getAction())) {
+            // Consume the action: the camera should not expand again on the
+            // next resume (e.g. after the user went back to the grid view)
+            intent.setAction(null);
             String cameraName = intent.getStringExtra(EXTRA_CAMERA_NAME);
             if (cameraName == null) {
                 int cameraNumber = intent.getIntExtra(EXTRA_CAMERA_NUMBER, 0) - 1;
@@ -547,7 +550,6 @@ public class SurveillanceFragment extends Fragment {
         protected ImageButton muteButton;
         protected boolean hasAudio = false;
         protected boolean isMuted = false;
-        protected int audioTrackId = -1;
         protected FrameLayout container;
         protected ViewGroup.LayoutParams originalLayoutParams;
         protected boolean playbackStarted = false;

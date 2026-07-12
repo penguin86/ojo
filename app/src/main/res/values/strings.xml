@@ -23,6 +23,16 @@
     <string name="menuitem_export_config">Export Configuration</string>
     <string name="menuitem_import_config">Import Configuration</string>
 
+    <string name="settings_export_success">Settings exported successfully</string>
+    <string name="settings_export_nothing">No settings found to export</string>
+    <string name="settings_export_write_error">Unable to open file for writing</string>
+    <string name="settings_export_error">Error exporting settings: %1$s</string>
+    <string name="settings_export_unsupported">Export requires Android 4.4 or later</string>
+    <string name="settings_import_success">Settings imported successfully</string>
+    <string name="settings_import_read_error">Unable to open file for reading</string>
+    <string name="settings_import_invalid">Not a valid Ojo settings file</string>
+    <string name="settings_import_error">Error importing settings: %1$s</string>
+
     <string name="app_info_title">About Ojo</string>
     <string name="app_info_creator_desc">Created by Daniele Verducci.</string>
     <string name="app_info_license_desc">This application is licensed under the GNU GENERAL PUBLIC LICENSE v3+. You can obtain a copy here: https://raw.githubusercontent.com/penguin86/ojo/master/LICENSE</string>

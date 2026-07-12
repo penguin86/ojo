@@ -21,6 +21,18 @@
     <string name="menuitem_deny_rotation">Только альбомная</string>
     <string name="menuitem_info">Инфо</string>
     <string name="menuitem_add_camera">Добавить</string>
+    <string name="menuitem_export_config">Экспорт конфигурации</string>
+    <string name="menuitem_import_config">Импорт конфигурации</string>
+
+    <string name="settings_export_success">Настройки успешно экспортированы</string>
+    <string name="settings_export_nothing">Нет настроек для экспорта</string>
+    <string name="settings_export_write_error">Не удалось открыть файл для записи</string>
+    <string name="settings_export_error">Ошибка экспорта настроек: %1$s</string>
+    <string name="settings_export_unsupported">Для экспорта требуется Android 4.4 или новее</string>
+    <string name="settings_import_success">Настройки успешно импортированы</string>
+    <string name="settings_import_read_error">Не удалось открыть файл для чтения</string>
+    <string name="settings_import_invalid">Недопустимый файл настроек Ojo</string>
+    <string name="settings_import_error">Ошибка импорта настроек: %1$s</string>
 
     <string name="app_info_title">О программе</string>
     <string name="app_info_creator_desc">Автор: Daniele Verducci.</string>
