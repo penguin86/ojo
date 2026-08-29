@@ -21,6 +21,18 @@
     <string name="menuitem_deny_rotation">Landscape only</string>
     <string name="menuitem_info">Info</string>
     <string name="menuitem_add_camera">Aggiungi</string>
+    <string name="menuitem_export_config">Esporta configurazione</string>
+    <string name="menuitem_import_config">Importa configurazione</string>
+
+    <string name="settings_export_success">Impostazioni esportate con successo</string>
+    <string name="settings_export_nothing">Nessuna impostazione da esportare</string>
+    <string name="settings_export_write_error">Impossibile aprire il file in scrittura</string>
+    <string name="settings_export_error">Errore durante l\'esportazione delle impostazioni: %1$s</string>
+    <string name="settings_export_unsupported">L\'esportazione richiede Android 4.4 o successivo</string>
+    <string name="settings_import_success">Impostazioni importate con successo</string>
+    <string name="settings_import_read_error">Impossibile aprire il file in lettura</string>
+    <string name="settings_import_invalid">Non è un file di impostazioni Ojo valido</string>
+    <string name="settings_import_error">Errore durante l\'importazione delle impostazioni: %1$s</string>
 
     <string name="app_info_title">Informazioni su Ojo</string>
     <string name="app_info_creator_desc">Creato da Daniele Verducci.</string>

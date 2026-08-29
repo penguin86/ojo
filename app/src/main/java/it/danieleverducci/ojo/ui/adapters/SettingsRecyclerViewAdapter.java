@@ -53,15 +53,21 @@ public class SettingsRecyclerViewAdapter extends RecyclerView.Adapter<SettingsRe
         holder.root.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                clickListener.onItemClick(holder.getBindingAdapterPosition());
+                int pos = holder.getBindingAdapterPosition();
+                if (pos == RecyclerView.NO_POSITION)
+                    return;
+                clickListener.onItemClick(pos);
             }
         });
 
         holder.deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mValues.remove(holder.getBindingAdapterPosition());
-                notifyItemRemoved(holder.getBindingAdapterPosition());
+                int pos = holder.getBindingAdapterPosition();
+                if (pos == RecyclerView.NO_POSITION)
+                    return;
+                mValues.remove(pos);
+                notifyItemRemoved(pos);
             }
         });
     }

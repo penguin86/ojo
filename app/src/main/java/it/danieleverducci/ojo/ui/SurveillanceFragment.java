@@ -2,11 +2,16 @@ package it.danieleverducci.ojo.ui;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -14,6 +19,10 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import androidx.core.view.WindowCompat;
@@ -21,10 +30,11 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.Fragment;
 
-import org.videolan.libvlc.IVLCVout;
 import org.videolan.libvlc.LibVLC;
 import org.videolan.libvlc.Media;
 import org.videolan.libvlc.MediaPlayer;
+import org.videolan.libvlc.interfaces.IMedia;
+import org.videolan.libvlc.interfaces.IVLCVout;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,15 +55,20 @@ public class SurveillanceFragment extends Fragment {
 
     final static private String TAG = "SurveillanceFragment";
     final static private String[] VLC_OPTIONS = new String[]{
-            "--aout=opensles",
+            // Default AudioTrack output: opensles does not support
+            // software volume (setVolume/getVolume), which mute relies on
+            //"--aout=opensles",
             //"--audio-time-stretch", // time stretching
             //"-vvv", // verbosity
             "--avcodec-codec=h264",
             //"--file-logging",
             //"--logfile=vlc-log.txt"
     };
+    final static private float MAX_ZOOM = 8f;
+    final static private float DOUBLE_TAP_ZOOM = 3f;
 
     private FragmentSurveillanceBinding binding;
+    private Settings settings;
     private List<CameraView> cameraViews = new ArrayList<>();
     private boolean fullscreenCameraView = false;
     private LinearLayout.LayoutParams cameraViewLayoutParams;
@@ -90,15 +105,11 @@ public class SurveillanceFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
-        leanbackMode(true);
+        // Grid view keeps the system bars; leanback only in single camera view
+        leanbackMode(false);
 
         fullscreenCameraView = false;
         addAllCameras();
-
-        // Start playback for all streams
-        for (CameraView cv : cameraViews) {
-            cv.startPlayback();
-        }
 
         expandToCameraViewIfRequired();
 
@@ -108,6 +119,8 @@ public class SurveillanceFragment extends Fragment {
             public boolean onBackPressed() {
                 if(fullscreenCameraView && cameraViews.size() > 1) {
                     fullscreenCameraView = false;
+                    leanbackMode(false);
+                    requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                     showAllCameras();
                     return true;
                 }
@@ -117,26 +130,34 @@ public class SurveillanceFragment extends Fragment {
     }
 
     /**
-     * Goes fullscreen igoring the device screen insets (camera etc)
+     * Leanback (single camera view): hides the system bars and draws below
+     * the notch and screen insets. Non-leanback (grid view): system bars
+     * stay visible and the layout fits between them.
      */
     private void leanbackMode(boolean leanback) {
         Window w = requireActivity().getWindow();
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P)
             return;
 
+        WindowInsetsControllerCompat windowInsetsController = WindowCompat.getInsetsController(w, w.getDecorView());
         if (leanback) {
+            // Draw below notches and screen insets
+            w.setFlags(
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
             w.getAttributes().layoutInDisplayCutoutMode =
                     WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 
             // Hide system bar
-            WindowInsetsControllerCompat windowInsetsController = WindowCompat.getInsetsController(w, w.getDecorView());
             windowInsetsController.hide(WindowInsetsCompat.Type.systemBars());
             // System bar is hidden when not touched for a while
             windowInsetsController.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
         } else {
-            // Show system bar
-            //WindowInsetsControllerCompat windowInsetsController = WindowCompat.getInsetsController(w, w.getDecorView());
-            //windowInsetsController.show(WindowInsetsCompat.Type.systemBars());
+            // Show system bar and fit the layout between the bars
+            w.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+            w.getAttributes().layoutInDisplayCutoutMode =
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
+            windowInsetsController.show(WindowInsetsCompat.Type.systemBars());
         }
     }
 
@@ -146,12 +167,20 @@ public class SurveillanceFragment extends Fragment {
 
         leanbackMode(false);
 
+        // Detach gesture listeners before destroying cameras to avoid
+        // touch events firing on detached views
+        for (CameraView cv : cameraViews) {
+            if (cv.container != null) {
+                cv.container.setOnTouchListener(null);
+            }
+        }
+
         disposeAllCameras();
     }
 
 
     private void addAllCameras() {
-        Settings settings = Settings.fromDisk(getContext());
+        settings = Settings.fromDisk(getContext());
         List<Camera> cc = settings.getCameras();
 
         int[] gridSize = calcGridDimensionsBasedOnNumberOfElements(cc.size());
@@ -166,18 +195,6 @@ public class SurveillanceFragment extends Fragment {
                     Camera cam = cc.get(camIdx);
                     CameraView cv = addCameraView(cam, row);
                     cv.startPlayback();
-                    cv.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            // Toggle single/multi camera views
-                            fullscreenCameraView = !fullscreenCameraView;
-                            if (fullscreenCameraView) {
-                                hideAllCameraViewsButNot(v);
-                            } else {
-                                showAllCameras();
-                            }
-                        }
-                    });
                 } else {
                     // Cameras are less than the maximum number of cells in grid: fill remaining cells with empty views
                     View ev = new View(getContext());
@@ -202,26 +219,35 @@ public class SurveillanceFragment extends Fragment {
     protected void hideAllCameraViewsButNot(View cameraView) {
         for (int i = 0; i < binding.gridRowContainer.getChildCount(); i++) {
             LinearLayout row = (LinearLayout) binding.gridRowContainer.getChildAt(i);
-            boolean emptyRow = true;
+            boolean found = false;
             for (int j = 0; j < row.getChildCount(); j++) {
-                View cam = row.getChildAt(j);
-                if (cameraView == cam)
-                    emptyRow = false;
-                else
-                    cam.setLayoutParams(hiddenLayoutParams);
+                View child = row.getChildAt(j);
+                if (child == cameraView) {
+                    found = true;
+                } else {
+                    child.setVisibility(View.GONE);
+                }
             }
-            if (emptyRow)
-                row.setLayoutParams(hiddenLayoutParams);
+            if (!found) {
+                row.setVisibility(View.GONE);
+            }
         }
     }
 
     protected void showAllCameras() {
+        // Restore original layout parameters for all camera views
+        for (CameraView cv : cameraViews) {
+            cv.resetZoom();
+            cv.container.setLayoutParams(cv.originalLayoutParams);
+            cv.setMuteButtonPosition(false);
+        }
+
         for (int i = 0; i < binding.gridRowContainer.getChildCount(); i++) {
             LinearLayout row = (LinearLayout) binding.gridRowContainer.getChildAt(i);
-            row.setLayoutParams(rowLayoutParams);
+            row.setVisibility(View.VISIBLE);
             for (int j = 0; j < row.getChildCount(); j++) {
-                View cam = row.getChildAt(j);
-                cam.setLayoutParams(cameraViewLayoutParams);
+                View child = row.getChildAt(j);
+                child.setVisibility(View.VISIBLE);
             }
         }
     }
@@ -232,11 +258,202 @@ public class SurveillanceFragment extends Fragment {
                 camera
         );
 
-        // Add to layout
-        rowContainer.addView(cv.surfaceView, cameraViewLayoutParams);
+        // Create a container FrameLayout for the SurfaceView and mute button
+        FrameLayout container = new FrameLayout(getContext());
+        container.setLayoutParams(cameraViewLayoutParams);
+        cv.container = container;
+        cv.originalLayoutParams = cameraViewLayoutParams;
+
+        // SurfaceView for video
+        cv.surfaceView = new SurfaceView(getContext());
+        cv.surfaceView.setOnFocusChangeListener((view, hasFocus) -> view.setBackgroundResource(hasFocus ? R.drawable.focus_border : 0));
+        // Set up SurfaceHolder callback so VLC reattaches after surface resize
+        cv.surfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
+            @Override
+            public void surfaceCreated(SurfaceHolder holder) {
+                if (cv.mediaPlayer == null) return;
+                IVLCVout vout = cv.mediaPlayer.getVLCVout();
+                if (vout.areViewsAttached()) vout.detachViews();
+                vout.setVideoView(cv.surfaceView);
+                vout.attachViews();
+            }
+
+            @Override
+            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+                if (cv.mediaPlayer != null) {
+                    cv.mediaPlayer.getVLCVout().setWindowSize(width, height);
+                }
+            }
+
+            @Override
+            public void surfaceDestroyed(SurfaceHolder holder) {
+                if (cv.mediaPlayer != null) {
+                    // Detach only — do NOT stop. VLC keeps buffering internally
+                    // and will resume rendering when the surface is recreated.
+                    cv.mediaPlayer.getVLCVout().detachViews();
+                }
+            }
+        });
+        container.addView(cv.surfaceView);
+
+        // Mute button
+        cv.muteButton = new ImageButton(getContext());
+        cv.muteButton.setBackgroundColor(0x66000000);
+        cv.muteButton.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        int btnSize = DpiUtils.DpToPixels(getContext(), 32);
+        int btnPadding = DpiUtils.DpToPixels(getContext(), 4);
+        cv.muteButton.setPadding(btnPadding, btnPadding, btnPadding, btnPadding);
+        FrameLayout.LayoutParams btnParams = new FrameLayout.LayoutParams(
+                btnSize, btnSize, Gravity.TOP | Gravity.START);
+        cv.muteButton.setLayoutParams(btnParams);
+        cv.setMuteButtonPosition(false);
+        cv.updateMuteButton();
+        cv.muteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (cv.hasAudio) {
+                    cv.isMuted = !cv.isMuted;
+                    // Software volume: unlike setAudioTrack(-1), this doesn't
+                    // shut down the audio output, so it can be toggled back on
+                    cv.mediaPlayer.setVolume(cv.isMuted ? 0 : 100);
+                    cv.updateMuteButton();
+                    // Persist mute state across restarts
+                    cv.camera.setMuted(cv.isMuted);
+                    settings.save();
+                }
+            }
+        });
+        container.addView(cv.muteButton);
+
+        // Touch handling: tap toggles single/grid view; in single view,
+        // pinch zooms, drag pans, double-tap zooms in/out.
+        // Touches land on the container because the SurfaceView is not clickable.
+        final ScaleGestureDetector scaleDetector = new ScaleGestureDetector(getContext(),
+                new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+            @Override
+            public boolean onScale(ScaleGestureDetector detector) {
+                if (!fullscreenCameraView) return false;
+                float oldScale = cv.zoomScale;
+                cv.zoomScale = Math.max(1f, Math.min(MAX_ZOOM, oldScale * detector.getScaleFactor()));
+                // Keep the video point under the fingers stationary while scaling
+                float factor = cv.zoomScale / oldScale;
+                float focusX = detector.getFocusX() - cv.container.getWidth() / 2f;
+                float focusY = detector.getFocusY() - cv.container.getHeight() / 2f;
+                cv.surfaceView.setTranslationX(focusX - (focusX - cv.surfaceView.getTranslationX()) * factor);
+                cv.surfaceView.setTranslationY(focusY - (focusY - cv.surfaceView.getTranslationY()) * factor);
+                cv.surfaceView.setScaleX(cv.zoomScale);
+                cv.surfaceView.setScaleY(cv.zoomScale);
+                cv.clampPan();
+                return true;
+            }
+        });
+        final GestureDetector gestureDetector = new GestureDetector(getContext(),
+                new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                return cv.container.performClick();
+            }
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                if (!fullscreenCameraView) {
+                    // In grid view treat it like a tap: expand the camera
+                    return cv.container.performClick();
+                }
+                if (cv.zoomScale > 1f) {
+                    cv.resetZoom();
+                } else {
+                    cv.zoomScale = DOUBLE_TAP_ZOOM;
+                    // Zoom centered on the tapped point
+                    float focusX = e.getX() - cv.container.getWidth() / 2f;
+                    float focusY = e.getY() - cv.container.getHeight() / 2f;
+                    cv.surfaceView.setTranslationX(focusX * (1f - DOUBLE_TAP_ZOOM));
+                    cv.surfaceView.setTranslationY(focusY * (1f - DOUBLE_TAP_ZOOM));
+                    cv.surfaceView.setScaleX(DOUBLE_TAP_ZOOM);
+                    cv.surfaceView.setScaleY(DOUBLE_TAP_ZOOM);
+                    cv.clampPan();
+                }
+                return true;
+            }
+
+            @Override
+            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+                if (!fullscreenCameraView || cv.zoomScale <= 1f) return false;
+                cv.surfaceView.setTranslationX(cv.surfaceView.getTranslationX() - distanceX);
+                cv.surfaceView.setTranslationY(cv.surfaceView.getTranslationY() - distanceY);
+                cv.clampPan();
+                return true;
+            }
+        });
+        container.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleFullscreen(cv);
+            }
+        });
+        container.setOnTouchListener((v, event) -> {
+            scaleDetector.onTouchEvent(event);
+            gestureDetector.onTouchEvent(event);
+            return true;
+        });
+
+        // Create media player
+        cv.mediaPlayer = new MediaPlayer(cv.libvlc);
+
+        // Listen for ES (elementary stream) added events to detect audio tracks
+        cv.mediaPlayer.setEventListener(new MediaPlayer.EventListener() {
+            @Override
+            public void onEvent(MediaPlayer.Event event) {
+                if (event.type == MediaPlayer.Event.ESAdded) {
+                    if (cv.mediaPlayer.getAudioTracksCount() > 0 && !cv.hasAudio) {
+                        cv.hasAudio = true;
+                        if (cv.camera.isMuted()) {
+                            cv.isMuted = true;
+                            cv.muteButton.post(() -> cv.applyMuteWithRetry(0));
+                        }
+                        cv.muteButton.post(() -> cv.updateMuteButton());
+                    }
+                }
+            }
+        });
+
+        // Load media
+        Media m = new Media(cv.libvlc, Uri.parse(camera.getRtspUrl()));
+        cv.mediaPlayer.setMedia(m);
 
         cameraViews.add(cv);
+        rowContainer.addView(container);
         return cv;
+    }
+
+    /**
+     * Toggles between single (fullscreen) camera view and the grid.
+     */
+    private void toggleFullscreen(CameraView cv) {
+        fullscreenCameraView = !fullscreenCameraView;
+        leanbackMode(fullscreenCameraView);
+
+        // Keep screen on in single-camera view
+        Window w = requireActivity().getWindow();
+        if (fullscreenCameraView) {
+            w.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        } else {
+            w.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
+        if (fullscreenCameraView) {
+            // Going fullscreen - make this view fill the screen
+            ViewGroup.LayoutParams params = cv.container.getLayoutParams();
+            params.width = ViewGroup.LayoutParams.MATCH_PARENT;
+            params.height = ViewGroup.LayoutParams.MATCH_PARENT;
+            cv.container.setLayoutParams(params);
+            hideAllCameraViewsButNot(cv.container);
+        } else {
+            // Going back to grid - restore original layout params
+            cv.resetZoom();
+            cv.container.setLayoutParams(cv.originalLayoutParams);
+            showAllCameras();
+        }
+        cv.setMuteButtonPosition(fullscreenCameraView);
     }
 
     /**
@@ -270,6 +487,9 @@ public class SurveillanceFragment extends Fragment {
         Intent intent = this.getActivity().getIntent();
 
         if (OPEN_CAMERA.equals(intent.getAction())) {
+            // Consume the action: the camera should not expand again on the
+            // next resume (e.g. after the user went back to the grid view)
+            intent.setAction(null);
             String cameraName = intent.getStringExtra(EXTRA_CAMERA_NAME);
             if (cameraName == null) {
                 int cameraNumber = intent.getIntExtra(EXTRA_CAMERA_NUMBER, 0) - 1;
@@ -284,13 +504,36 @@ public class SurveillanceFragment extends Fragment {
         if (index < 0 || cameraViews.size() <= index) {
             return;
         }
-        hideAllCameraViewsButNot(cameraViews.get(index).surfaceView);
+        // Going fullscreen - make this view fill the screen
+        CameraView cv = cameraViews.get(index);
+
+        // Keep screen on in single-camera view
+        requireActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        ViewGroup.LayoutParams params = cv.container.getLayoutParams();
+        params.width = ViewGroup.LayoutParams.MATCH_PARENT;
+        params.height = ViewGroup.LayoutParams.MATCH_PARENT;
+        cv.container.setLayoutParams(params);
+        hideAllCameraViewsButNot(cv.container);
+        fullscreenCameraView = true;
+        leanbackMode(true);
+        cv.setMuteButtonPosition(true);
     }
 
     private void expandByName(String name) {
         for(CameraView cameraView: cameraViews) {
             if (cameraView.camera.getName().equals(name)) {
-                hideAllCameraViewsButNot(cameraView.surfaceView);
+                // Going fullscreen - make this view fill the screen
+                ViewGroup.LayoutParams params = cameraView.container.getLayoutParams();
+
+                // Keep screen on in single-camera view
+                requireActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                params.width = ViewGroup.LayoutParams.MATCH_PARENT;
+                params.height = ViewGroup.LayoutParams.MATCH_PARENT;
+                cameraView.container.setLayoutParams(params);
+                hideAllCameraViewsButNot(cameraView.container);
+                fullscreenCameraView = true;
+                leanbackMode(true);
+                cameraView.setMuteButtonPosition(true);
                 break;
             }
         }
@@ -302,54 +545,92 @@ public class SurveillanceFragment extends Fragment {
     private class CameraView {
         protected SurfaceView surfaceView;
         protected MediaPlayer mediaPlayer;
-        protected IVLCVout ivlcVout;
         protected Camera camera;
         protected LibVLC libvlc;
+        protected ImageButton muteButton;
+        protected boolean hasAudio = false;
+        protected boolean isMuted = false;
+        protected FrameLayout container;
+        protected ViewGroup.LayoutParams originalLayoutParams;
+        protected boolean playbackStarted = false;
+        protected float zoomScale = 1f;
 
         public CameraView(Context context, Camera camera) {
             this.camera = camera;
             this.libvlc = new LibVLC(context, new ArrayList<>(Arrays.asList(VLC_OPTIONS)));
-
-            surfaceView = new SurfaceView(context);
-            surfaceView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-                }
-            });
-            surfaceView.setOnFocusChangeListener((view, hasFocus) -> view.setBackgroundResource(hasFocus ? R.drawable.focus_border : 0));
-            SurfaceHolder holder = surfaceView.getHolder();
-
-            holder.setKeepScreenOn(true);
-
-            // Create media player
-            mediaPlayer = new MediaPlayer(libvlc);
-
-            // Set up video output
-            ivlcVout = mediaPlayer.getVLCVout();
-            ivlcVout.setVideoView(surfaceView);
-            ivlcVout.attachViews();
-
-            // Load media and start playing
-            Media m = new Media(libvlc, Uri.parse(camera.getRtspUrl()));
-            mediaPlayer.setMedia(m);
-
-            // Register for view resize events
-            final ViewTreeObserver observer= surfaceView.getViewTreeObserver();
-            observer.addOnGlobalLayoutListener(() -> {
-                // Set rendering size
-                ivlcVout.setWindowSize(surfaceView.getWidth(), surfaceView.getHeight());
-            });
         }
 
-        public void setOnClickListener(View.OnClickListener listener) {
-            surfaceView.setOnClickListener(listener);
+        private void updateMuteButton() {
+            if (!hasAudio) {
+                muteButton.setImageResource(R.drawable.ic_music_off);
+                muteButton.setColorFilter(Color.GRAY); // No audio available
+            } else if (isMuted) {
+                muteButton.setImageResource(R.drawable.ic_music_off);
+                muteButton.setColorFilter(Color.RED); // Muted
+            } else {
+                muteButton.setImageResource(R.drawable.ic_music_note);
+                muteButton.setColorFilter(Color.GREEN); // Playing with audio
+            }
+        }
+
+        /**
+         * Moves the mute button: in fullscreen it is shifted down and right
+         * to clear curved screen corners.
+         */
+        protected void setMuteButtonPosition(boolean fullscreen) {
+            FrameLayout.LayoutParams p = (FrameLayout.LayoutParams) muteButton.getLayoutParams();
+            int margin = DpiUtils.DpToPixels(muteButton.getContext(), fullscreen ? 24 : 4);
+            p.setMargins(margin, margin, 0, 0);
+            muteButton.setLayoutParams(p);
+        }
+
+        /**
+         * Applies the persisted mute state. The audio output may not be
+         * initialized yet when the audio track is first detected, in which
+         * case setVolume doesn't take effect: verify and retry.
+         */
+        protected void applyMuteWithRetry(int attempt) {
+            if (mediaPlayer == null || !isMuted) return;
+            mediaPlayer.setVolume(0);
+            if (mediaPlayer.getVolume() != 0 && attempt < 10) {
+                muteButton.postDelayed(() -> applyMuteWithRetry(attempt + 1), 300);
+            }
+        }
+
+        /**
+         * Limits panning so the visible area never goes past the edges of the
+         * actual video frame (the letterbox bars are not pannable).
+         */
+        protected void clampPan() {
+            float w = surfaceView.getWidth();
+            float h = surfaceView.getHeight();
+            float maxX = (zoomScale - 1f) * w / 2f;
+            float maxY = (zoomScale - 1f) * h / 2f;
+            IMedia.VideoTrack vt = mediaPlayer != null ? mediaPlayer.getCurrentVideoTrack() : null;
+            if (vt != null && vt.width > 0 && vt.height > 0) {
+                // VLC letterboxes the video inside the surface: clamp to the
+                // video frame, not the surface, so black bars stay centered
+                float fit = Math.min(w / vt.width, h / vt.height);
+                maxX = Math.max(0f, (vt.width * fit * zoomScale - w) / 2f);
+                maxY = Math.max(0f, (vt.height * fit * zoomScale - h) / 2f);
+            }
+            surfaceView.setTranslationX(Math.max(-maxX, Math.min(maxX, surfaceView.getTranslationX())));
+            surfaceView.setTranslationY(Math.max(-maxY, Math.min(maxY, surfaceView.getTranslationY())));
+        }
+
+        protected void resetZoom() {
+            zoomScale = 1f;
+            surfaceView.setScaleX(1f);
+            surfaceView.setScaleY(1f);
+            surfaceView.setTranslationX(0f);
+            surfaceView.setTranslationY(0f);
         }
 
         /**
          * Starts the playback.
          */
         public void startPlayback() {
+            playbackStarted = true;
             mediaPlayer.play();
         }
 
@@ -362,9 +643,9 @@ public class SurveillanceFragment extends Fragment {
                 return;
             }
 
+            playbackStarted = false;
             mediaPlayer.stop();
-            final IVLCVout vout = mediaPlayer.getVLCVout();
-            vout.detachViews();
+            mediaPlayer.getVLCVout().detachViews();
             libvlc.release();
             libvlc = null;
             mediaPlayer.release();

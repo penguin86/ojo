@@ -6,6 +6,7 @@ public class Camera implements Serializable {
     private static final long serialVersionUID = -3837361587400158910L;
     private String name;
     private String rtspUrl;
+    private boolean muted;
 
     public Camera(String name, String rtspUrl) {
         this.name = name;
@@ -26,5 +27,13 @@ public class Camera implements Serializable {
 
     public String getRtspUrl() {
         return rtspUrl;
+    }
+
+    public boolean isMuted() {
+        return muted;
+    }
+
+    public void setMuted(boolean muted) {
+        this.muted = muted;
     }
 }
